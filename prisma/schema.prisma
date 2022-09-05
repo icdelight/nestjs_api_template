@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model tbl_users {
+  id_user     Int      @id @default(autoincrement())
+  name        String?  @db.VarChar(50)
+  pass        String?  @db.VarChar(500)
+  flag_active Boolean?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  firstName   String?
+  lastName    String?
+  apps        String?  @db.VarChar(20)
+  role        String?  @db.VarChar(3)
+  id_area     Int?
+  id_sub_area Int?
+
+  @@index([apps], map: "apps_idx")
+  @@map("users")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model tbl_role_users {
+  id_role   Int
+  role_name String? @db.VarChar(50)
+  id_menu   Int     @default(0)
+
+  @@id([id_role, id_menu])
+  @@map("roles")
+  @@ignore
+}
+
+model tbl_menu {
+  id_menu   Int     @id @default(autoincrement())
+  menu_name String? @db.VarChar(50)
+  menu_link String? @db.VarChar(255)
+  role      String? @db.VarChar(3)
+
+  @@map("menu")
+}
+
+model tbl_goals {
+  id_goals           Int       @id @default(autoincrement())
+  title_goals        String?   @db.VarChar(150)
+  desc_goals         String?   @db.VarChar(500)
+  pic_goals          String?   @db.VarChar(150)
+  start_date         DateTime? @db.DateTime(0)
+  due_date           DateTime? @db.DateTime(0)
+  status_goals       Int?
+  progress           Int?
+  parent_goals       Int?
+  type_goals         String?   @db.VarChar(250)
+  last_modified_date DateTime? @default(now()) @db.DateTime(0)
+  indikator          String?   @db.VarChar(500)
+
+  @@map("goals")
+}
+
+model mst_area {
+  id_area        Int?
+  id_sub_area    Int     @id
+  desc_area      String? @db.VarChar(255)
+  desc_sub_area  String? @db.VarChar(255)
+  id_parent_area String? @db.VarChar(255)
+  active         Int?
+}
