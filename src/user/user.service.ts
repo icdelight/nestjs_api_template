@@ -8,6 +8,52 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { tbl_users } from '@prisma/client';
 
+function recurseArea(allArea,parent) {
+    let obj = [];
+    let ChildArea = [];
+    let parentArea = {};
+    let parentKey = {};
+    let resArea = [];
+    let indikator = [];
+    let style_col = {};
+
+    Object.keys(allArea[parent]).forEach(function(key) {
+        obj = allArea[key];
+        if(!parentArea[key] && key != "0") {
+            parentArea[key] = {};
+        }
+    });
+    let idx = "0";
+    if(Object.keys(allArea[parent]) && Object.keys(allArea[parent]).length > 0) {
+        // console.log(Object.keys(allArea[parent]));
+        Object.keys(allArea[parent]).forEach(function(key) {
+            obj = allArea[parent][key];
+            ChildArea = [];
+            Object.keys(obj).forEach(async function(keys) {
+                if(obj[keys] !== null && keys.length <= 3 && parentArea[keys]) {
+                }else{
+                    parentArea[key]["id_area"] = obj['id_area'];
+                    parentArea[key]["id_sub_area"] = obj['id_sub_area'];
+                    parentArea[key]["desc_area"] = obj['desc_area'];
+                    parentArea[key]["desc_sub_area"] = obj['desc_sub_area'];
+                    parentArea[key]["id_parent_area"] = obj['id_parent_area'];
+                    parentArea[key]["active"] = obj['active'];
+                }
+            });
+
+            if(allArea[key]) {
+                // console.log('all',allGoal[key]);
+                ChildArea =  recurseArea(allArea,key);
+                parentArea[key]["children"] = ChildArea;
+            }
+            idx = key;
+
+        resArea.push(parentArea[key]);
+        });
+    }
+    return resArea;
+}
+
 @Injectable()
 export class UserServices{
     constructor(private config: ConfigService, private prisma: PrismaService, private jwt: JwtService) {}
@@ -74,21 +120,21 @@ export class UserServices{
             throw new ForbiddenException('You dont have privileges.')
         }
         let users = null;
-        users = await this.prisma.tbl_users.findMany({
-            select: {
-                id_user: true,
-                name: true,
-                firstName: true,
-                lastName: true,
-                role: true,
-                flag_active: true,
-                createdAt: true,
-                updatedAt: true,
-                id_area: true,
-                id_sub_area: true,
-                apps: true,
-            }
-        });
+        // users = await this.prisma.tbl_users.findMany({
+        //     select: {
+        //         id_user: true,
+        //         name: true,
+        //         firstName: true,
+        //         lastName: true,
+        //         role: true,
+        //         flag_active: true,
+        //         createdAt: true,
+        //         updatedAt: true,
+        //         id_area: true,
+        //         id_sub_area: true,
+        //         apps: true,
+        //     }
+        // });
         users = await this.prisma.$queryRaw`SELECT name,pass,flag_active,createdAt,updatedAt,firstName,lastName,apps,role,c.role_name,a.id_area as id_area,desc_area,a.id_sub_area as id_sub_area,desc_sub_area,id_parent_area FROM users a INNER JOIN roles c ON a.role = c.id_role LEFT JOIN mst_area b ON a.id_sub_area = b.id_sub_area WHERE a.flag_active = 1;`;
         if(users) {
             statusCode = 200;
@@ -97,6 +143,48 @@ export class UserServices{
         }else{
             statusCode = 0;
             message = "Failed inquiry user";
+        }
+        let result = {"statusCode":statusCode,"message":message,"data":data};
+        return result;
+    }
+
+    async getAllArea(user: tbl_users,dto : any) {
+        let statusCode = 999;
+        let message = "Something went wrong.";
+        let data = null;
+        if(user.role != "1") {
+            throw new ForbiddenException('You dont have privileges.')
+        }
+        let allArea = [];
+        let topArea = [];
+        let parent_id = 0;
+        let resArea = [];
+        try {
+            topArea = await this.prisma.mst_area.findMany();
+            // console.log(topArea);
+            topArea.forEach(element => {
+                if(element !== null) {
+                    if(element.id_parent_area != parent_id || parent_id == 0) {
+                        allArea[element.id_parent_area] = {};
+                    }
+                    allArea[element.id_parent_area][element.id_area] = element;
+                    parent_id = element.id_parent_area;
+                }
+            });
+            // console.log(allArea);
+            resArea = recurseArea(allArea,"0");
+
+            if(resArea[0]) {
+                statusCode = 200;
+                message = "Success inquiry area";
+                data = resArea[0];
+            }else{
+                statusCode = 0;
+                message = "Failed inquiry area";
+            }
+        }catch(error) {
+            console.log(error);
+            throw new InternalServerErrorException(error);
         }
         let result = {"statusCode":statusCode,"message":message,"data":data};
         return result;
