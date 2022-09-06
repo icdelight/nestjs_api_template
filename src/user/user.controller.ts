@@ -26,6 +26,11 @@ export class UserController {
     getAllUser(@GetUser() user: tbl_users, @Body() dto: any) {
         return this.userService.getAllUsers(user,dto);
     }
+    
+    @Post('allarea')
+    getAllArea(@GetUser() user: tbl_users, @Body() dto: any) {
+        return this.userService.getAllArea(user,dto);
+    }
 
     @Get('allmenus')
     getAllMenu(@GetUser() user: tbl_users, @Body() dto: any) {

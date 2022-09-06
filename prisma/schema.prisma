@@ -69,6 +69,6 @@ model mst_area {
   id_sub_area    Int     @id
   desc_area      String? @db.VarChar(255)
   desc_sub_area  String? @db.VarChar(255)
-  id_parent_area String? @db.VarChar(255)
+  id_parent_area Int?
   active         Int?
 }
