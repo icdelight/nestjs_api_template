@@ -4,7 +4,9 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  // url      = env("DATABASE_URL")
+  url      = "mysql://u1784932_wp305:P%40ssw0rdTempl%40te@localhost:3306/u1784932_template_mysql?schema=public"
+  shadowDatabaseUrl = "mysql://u1784932_wp305:P%40ssw0rdTempl%40te@localhost:3306/u1784932_shadow_template_mysql?schema=public"
 }
 
 model tbl_users {
