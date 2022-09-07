@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, HttpException, Injectable, InternalServerErrorException } from "@nestjs/common";
+import { BadRequestException, ConflictException, ForbiddenException, HttpException, Injectable, InternalServerErrorException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { AuthDto } from "../auth/dto";
 import { UserDetDto } from "../auth/dto";
@@ -184,6 +184,7 @@ export class UserServices{
             }
         }catch(error) {
             console.log(error);
+            
             throw new InternalServerErrorException(error);
         }
         let result = {"statusCode":statusCode,"message":message,"data":data};

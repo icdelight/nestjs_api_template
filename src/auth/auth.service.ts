@@ -38,6 +38,7 @@ export class AuthServices{
                     updatedAt: true,
                 }
             })
+            console.info(user);
             if(user) {
                 statusCode = 200;
                 message = "Success to signup.";
