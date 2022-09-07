@@ -1,5 +1,6 @@
 -- CreateTable
-CREATE TABLE `users` (
+
+CREATE TABLE IF NOT EXISTS `users` (
     `id_user` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(50) NULL,
     `pass` VARCHAR(500) NULL,
@@ -18,7 +19,7 @@ CREATE TABLE `users` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `roles` (
+CREATE TABLE IF NOT EXISTS `roles` (
     `id_role` INTEGER NOT NULL,
     `role_name` VARCHAR(50) NULL,
     `id_menu` INTEGER NOT NULL DEFAULT 0,
@@ -27,7 +28,7 @@ CREATE TABLE `roles` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `menu` (
+CREATE TABLE IF NOT EXISTS `menu` (
     `id_menu` INTEGER NOT NULL AUTO_INCREMENT,
     `menu_name` VARCHAR(50) NULL,
     `menu_link` VARCHAR(255) NULL,
@@ -37,7 +38,7 @@ CREATE TABLE `menu` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `goals` (
+CREATE TABLE IF NOT EXISTS `goals` (
     `id_goals` INTEGER NOT NULL AUTO_INCREMENT,
     `title_goals` VARCHAR(150) NULL,
     `desc_goals` VARCHAR(500) NULL,
@@ -55,7 +56,7 @@ CREATE TABLE `goals` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `mst_area` (
+CREATE TABLE IF NOT EXISTS `mst_area` (
     `id_area` INTEGER NULL,
     `id_sub_area` INTEGER NOT NULL,
     `desc_area` VARCHAR(255) NULL,
