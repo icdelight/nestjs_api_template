@@ -148,49 +148,6 @@ export class UserServices{
         return result;
     }
 
-    async getAllArea(user: tbl_users,dto : any) {
-        let statusCode = 999;
-        let message = "Something went wrong.";
-        let data = null;
-        if(user.role != "1") {
-            throw new ForbiddenException('You dont have privileges.')
-        }
-        let allArea = [];
-        let topArea = [];
-        let parent_id = 0;
-        let resArea = [];
-        try {
-            topArea = await this.prisma.mst_area.findMany();
-            // console.log(topArea);
-            topArea.forEach(element => {
-                if(element !== null) {
-                    if(element.id_parent_area != parent_id || parent_id == 0) {
-                        allArea[element.id_parent_area] = {};
-                    }
-                    allArea[element.id_parent_area][element.id_area] = element;
-                    parent_id = element.id_parent_area;
-                }
-            });
-            // console.log(allArea);
-            resArea = recurseArea(allArea,"0");
-
-            if(resArea[0]) {
-                statusCode = 200;
-                message = "Success inquiry area";
-                data = resArea[0];
-            }else{
-                statusCode = 0;
-                message = "Failed inquiry area";
-            }
-        }catch(error) {
-            console.log(error);
-            
-            throw new InternalServerErrorException(error);
-        }
-        let result = {"statusCode":statusCode,"message":message,"data":data};
-        return result;
-    }
-
     async getAllMenu(user: tbl_users,dto : any) {
         let statusCode = 999;
         let message = "Something went wrong.";

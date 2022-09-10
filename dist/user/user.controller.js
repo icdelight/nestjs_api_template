@@ -30,9 +30,6 @@ let UserController = class UserController {
     getAllUser(user, dto) {
         return this.userService.getAllUsers(user, dto);
     }
-    getAllArea(user, dto) {
-        return this.userService.getAllArea(user, dto);
-    }
     getAllMenu(user, dto) {
         return this.userService.getAllMenu(user, dto);
     }
@@ -61,14 +58,6 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "getAllUser", null);
-__decorate([
-    (0, common_1.Post)('allarea'),
-    __param(0, (0, decorator_1.GetUser)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", void 0)
-], UserController.prototype, "getAllArea", null);
 __decorate([
     (0, common_1.Get)('allmenus'),
     __param(0, (0, decorator_1.GetUser)()),

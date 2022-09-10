@@ -12,92 +12,98 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GoalsController = void 0;
+exports.AreaController = void 0;
 const common_1 = require("@nestjs/common");
-const goals_service_1 = require("./goals.service");
-const decorator_1 = require("../auth/decorator");
 const guard_1 = require("../auth/guard");
-let GoalsController = class GoalsController {
-    constructor(goalService) {
-        this.goalService = goalService;
+const area_service_1 = require("./area.service");
+const decorator_1 = require("../auth/decorator");
+const dto_1 = require("../auth/dto");
+let AreaController = class AreaController {
+    constructor(areaService) {
+        this.areaService = areaService;
     }
-    allGoals(user) {
-        return this.goalService.allgoal(user);
+    getAllArea(user, dto) {
+        return this.areaService.getAllArea(user, dto);
     }
-    alltreeGoals(user) {
-        return this.goalService.alltreegoal(user);
+    getAllAreaPage(user, dto) {
+        return this.areaService.getAllAreaByPage(user, dto);
     }
-    allGoalsAdmin(user) {
-        return this.goalService.allgoaladmin(user);
+    findAreaPage(user, dto) {
+        return this.areaService.getAllAreaByName(user, dto);
     }
-    addGoals(user, dto) {
-        console.log(dto);
-        return this.goalService.addgoal(user, dto);
+    getAllAreatTree(user, dto) {
+        return this.areaService.getAllAreaTree(user, dto);
     }
-    editGoals(user, dto) {
-        console.log(dto);
-        console.log(dto.id_goals);
-        return this.goalService.editgoal(user, dto);
+    getAllParentArea(user, dto) {
+        return this.areaService.getParentArea(user, dto);
     }
-    remapGoals(user, dto) {
-        return this.goalService.remapgoal(user, dto);
+    addArea(user, dto) {
+        return this.areaService.addArea(user, dto);
+    }
+    editArea(user, dto) {
+        return this.areaService.editArea(user, dto);
     }
 };
 __decorate([
-    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    (0, common_1.Post)('allgoals'),
-    __param(0, (0, decorator_1.GetUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], GoalsController.prototype, "allGoals", null);
-__decorate([
-    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    (0, common_1.Post)('alltreegoals'),
-    __param(0, (0, decorator_1.GetUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], GoalsController.prototype, "alltreeGoals", null);
-__decorate([
-    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    (0, common_1.Post)('allgoalsadmin'),
-    __param(0, (0, decorator_1.GetUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], GoalsController.prototype, "allGoalsAdmin", null);
-__decorate([
-    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    (0, common_1.Post)('addgoals'),
+    (0, common_1.Post)('allarea'),
     __param(0, (0, decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
-], GoalsController.prototype, "addGoals", null);
+], AreaController.prototype, "getAllArea", null);
 __decorate([
-    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    (0, common_1.Post)('editgoals'),
+    (0, common_1.Post)('allareapage'),
     __param(0, (0, decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
-], GoalsController.prototype, "editGoals", null);
+], AreaController.prototype, "getAllAreaPage", null);
 __decorate([
-    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    (0, common_1.Post)('remapgoals'),
+    (0, common_1.Post)('findareapage'),
     __param(0, (0, decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
-], GoalsController.prototype, "remapGoals", null);
-GoalsController = __decorate([
+], AreaController.prototype, "findAreaPage", null);
+__decorate([
+    (0, common_1.Post)('allareatree'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], AreaController.prototype, "getAllAreatTree", null);
+__decorate([
+    (0, common_1.Post)('allparentarea'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], AreaController.prototype, "getAllParentArea", null);
+__decorate([
+    (0, common_1.Post)('addarea'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, dto_1.AreaDto]),
+    __metadata("design:returntype", void 0)
+], AreaController.prototype, "addArea", null);
+__decorate([
+    (0, common_1.Post)('editarea'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], AreaController.prototype, "editArea", null);
+AreaController = __decorate([
     (0, common_1.UseGuards)(guard_1.JwtGuard),
-    (0, common_1.Controller)('goals'),
-    __metadata("design:paramtypes", [goals_service_1.GoalsService])
-], GoalsController);
-exports.GoalsController = GoalsController;
-//# sourceMappingURL=goals.controller.js.map
+    (0, common_1.Controller)('area'),
+    __metadata("design:paramtypes", [area_service_1.AreaServices])
+], AreaController);
+exports.AreaController = AreaController;
+//# sourceMappingURL=area.controller.js.map

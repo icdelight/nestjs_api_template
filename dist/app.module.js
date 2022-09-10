@@ -13,6 +13,7 @@ const auth_module_1 = require("./auth/auth.module");
 const prisma_module_1 = require("./prisma/prisma.module");
 const user_module_1 = require("./user/user.module");
 const goals_module_1 = require("./goals/goals.module");
+const area_module_1 = require("./area/area.module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -24,7 +25,8 @@ AppModule = __decorate([
             auth_module_1.AuthModule,
             user_module_1.UserModule,
             prisma_module_1.PrismaModule,
-            goals_module_1.GoalsModule
+            goals_module_1.GoalsModule,
+            area_module_1.AreaModule,
         ],
     })
 ], AppModule);

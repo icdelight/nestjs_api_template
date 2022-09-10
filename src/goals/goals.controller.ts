@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Req, Post, Query, UseGuards } from '@nestjs/common';
 import { GoalsService } from "./goals.service";
 import { AuthGuard } from '@nestjs/passport';
 import { tbl_users } from '@prisma/client';
@@ -32,20 +32,23 @@ export class GoalsController {
 
     @HttpCode(HttpStatus.OK)
     @Post('addgoals')
-    addGoals(@GetUser() user: tbl_users,  @Query() dto: any) {
+    addGoals(@GetUser() user: tbl_users,  @Body() dto: any) {
+        console.log(dto);
         return this.goalService.addgoal(user,dto);
     }
 
     @HttpCode(HttpStatus.OK)
     @Post('editgoals')
-    editGoals(@GetUser() user: tbl_users,  @Query() dto: any) {
+    editGoals(@GetUser() user: tbl_users,  @Body() dto: any) {
         console.log(dto);
+        // const req = JSON.parse(dto);
+        console.log(dto.id_goals);
         return this.goalService.editgoal(user,dto);
     }
 
     @HttpCode(HttpStatus.OK)
     @Post('remapgoals')
-    remapGoals(@GetUser() user: tbl_users,  @Query() dto: any) {
+    remapGoals(@GetUser() user: tbl_users,  @Body() dto: any) {
         // console.log(dto);
         return this.goalService.remapgoal(user,dto);
     }

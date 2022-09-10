@@ -18,11 +18,6 @@ export declare class UserServices {
         message: string;
         data: any;
     }>;
-    getAllArea(user: tbl_users, dto: any): Promise<{
-        statusCode: number;
-        message: string;
-        data: any;
-    }>;
     getAllMenu(user: tbl_users, dto: any): Promise<{
         statusCode: number;
         message: string;

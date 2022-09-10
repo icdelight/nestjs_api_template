@@ -24,7 +24,7 @@ export declare class AuthServices {
         userData: {
             id: number;
             name: string;
-            role: string;
+            role: any;
             email: string;
             fullname: string;
             id_area: number;

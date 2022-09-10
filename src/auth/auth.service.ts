@@ -6,6 +6,7 @@ import * as argon from "argon2";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
+import { tbl_users } from '@prisma/client';
 
 @Injectable()
 export class AuthServices{
@@ -68,45 +69,47 @@ export class AuthServices{
         return {
             access_token : token,
         }; 
-    } 
+    }; 
     async signin(dto : AuthDto){
         let statusCode = 999;
         let message = "Something went wrong";
         //find user
-        const user = await this.prisma.tbl_users.findFirst({
-            where : {
-                name : dto.user,
-                flag_active: true,
-            }
-        })
+        // const user = await this.prisma.tbl_users.findFirst({
+        //     where : {
+        //         name : dto.user,
+        //         flag_active: true,
+        //     }
+        // })
+        const user = await this.prisma.$queryRaw<tbl_users[]>`SELECT a.*,b.role_name as role_name FROM users a INNER JOIN roles b ON a.role = b.id_role WHERE a.name = ${dto.user} and a.flag_active = 1;`;
         // const user = await this.prisma.$queryRaw`SELECT name,pass,flag_active,createdAt,updatedAt,firstName,lastName,apps,role,a.id_area as id_area,desc_area,a.id_sub_area as id_sub_area,desc_sub_area,id_parent_area FROM users a INNER JOIN mst_area b ON a.id_sub_area = b.id_sub_area WHERE a.name = ${dto.user} and a.flag_active = 1;`;
         //if user doesnt exist
         if(!user) {
             throw new ForbiddenException('Credential incorrect.');
         }
+        // console.log(user[0]["role_name"]);
         //find menu 
         const menu = await this.prisma.tbl_menu.findMany({
             where : {
-                role : user.role,
+                role : user[0].role,
             }
         })
         //compare password
-        const passMatch = await argon.verify(user.pass,dto.pass);
+        const passMatch = await argon.verify(user[0].pass,dto.pass);
         //if password incorrect 
         if(!passMatch) {
             throw new ForbiddenException('Credential incorrect.');
         }
         //send back user
         // delete user.pass;
-        const tokens = await this.signToken(user.id_user, user.name, user.role);
+        const tokens = await this.signToken(user[0].id_user, user[0].name, user[0].role);
         const userData = {
-            id : user.id_user,
-            name: user.name,
-            role: user.role === '1' ? 'superadmin' : user.role === '2' ? 'editor' : 'viewer',
-            email: user.firstName,
-            fullname: `${user.firstName} ${user.lastName !== null ? user.lastName : '' }`,
-            id_area : user.id_area,
-            id_sub_area : user.id_sub_area,
+            id : user[0].id_user,
+            name: user[0].name,
+            role: user[0]["role_name"],
+            email: user[0].firstName,
+            fullname: `${user[0].firstName} ${user[0].lastName !== null ? user[0].lastName : '' }`,
+            id_area : user[0].id_area,
+            id_sub_area : user[0].id_sub_area,
         };
         if(tokens.access_token.length != 0) {
             statusCode = 200;
@@ -117,5 +120,5 @@ export class AuthServices{
         }
         const resdata = {"statusCode":statusCode,"message":message,tokens,userData};
         return resdata
-    }
+    };
 }

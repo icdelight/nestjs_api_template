@@ -182,27 +182,34 @@ let GoalsService = class GoalsService {
                 }
             });
             let parent_id = 0;
-            topGoal.forEach(element => {
-                if (element !== null) {
-                    if (element.parent_goals != parent_id || parent_id == 0) {
-                        allGoal[element.parent_goals] = {};
+            if (topGoal && topGoal.length > 0) {
+                topGoal.forEach(element => {
+                    if (element !== null) {
+                        if (element.parent_goals != parent_id || parent_id == 0) {
+                            allGoal[element.parent_goals] = {};
+                        }
+                        allGoal[element.parent_goals][element.id_goals] = element;
+                        parent_id = element.parent_goals;
                     }
-                    allGoal[element.parent_goals][element.id_goals] = element;
-                    parent_id = element.parent_goals;
+                });
+                let obj = [];
+                parent_id = 0;
+                let parentGoal = {};
+                let ChildGoal = [];
+                resTree = recurseTree(allGoal, "0");
+                if (resTree[0] !== undefined) {
+                    statusCode = 200;
+                    message = "Success Inquiry Goals.";
                 }
-            });
-            let obj = [];
-            parent_id = 0;
-            let parentGoal = {};
-            let ChildGoal = [];
-            resTree = recurseTree(allGoal, "0");
-            if (resTree[0] !== undefined) {
-                statusCode = 200;
-                message = "Success Inquiry Goals.";
+                else {
+                    statusCode = 0;
+                    message = "Failed Inquiry Goals.";
+                }
             }
             else {
                 statusCode = 0;
-                message = "Failed Inquiry Goals.";
+                message = "Failed Inquiry Goals, Empty goals.";
+                resTree[0] = [];
             }
             result = { "statusCode": statusCode, "message": message, "data": resTree[0] };
         }
@@ -225,7 +232,6 @@ let GoalsService = class GoalsService {
         let childGoal = null;
         try {
             topGoal = await this.prisma.$queryRaw `select id_goals as id, title_goals as title, desc_goals as description, pic_goals as pic,b.firstName, start_date, due_date, status_goals, parent_goals as parent, type_goals, last_modified_date, progress, indikator from goals a inner join users b on a.pic_goals = b.name order by parent_goals asc;`;
-            console.log(topGoal);
             let parent_id = 0;
             if (topGoal && topGoal.length != 0) {
                 topGoal.forEach(element => {
@@ -237,6 +243,7 @@ let GoalsService = class GoalsService {
                         parent_id = element.parent;
                     }
                 });
+                console.log(allGoal);
                 let obj = [];
                 parent_id = 0;
                 let parentGoal = {};
@@ -342,7 +349,6 @@ let GoalsService = class GoalsService {
         return result;
     }
     async addgoal(user, dto) {
-        console.log(dto);
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
@@ -356,8 +362,8 @@ let GoalsService = class GoalsService {
                     title_goals: dto.title_goals,
                     desc_goals: dto.desc_goals,
                     pic_goals: dto.pic_goals,
-                    start_date: dto.start_date,
-                    due_date: dto.due_date,
+                    start_date: new Date(dto.start_date),
+                    due_date: new Date(dto.due_date),
                     status_goals: Number("1"),
                     progress: Number("0"),
                     parent_goals: Number.isInteger(dto.parent_goals) ? dto.parent_goals : Number(dto.parent_goals),
@@ -375,6 +381,7 @@ let GoalsService = class GoalsService {
             }
         }
         catch (error) {
+            console.log(error);
             throw new common_1.InternalServerErrorException(error);
         }
         let result = { "statusCode": statusCode, "message": message, "data": addGoal };
@@ -394,8 +401,8 @@ let GoalsService = class GoalsService {
                     title_goals: dto.title_goals,
                     desc_goals: dto.desc_goals,
                     pic_goals: dto.pic_goals,
-                    start_date: dto.start_date,
-                    due_date: dto.due_date,
+                    start_date: new Date(dto.start_date),
+                    due_date: new Date(dto.due_date),
                     status_goals: Number.isInteger(dto.status) ? dto.status : Number(dto.status),
                     type_goals: dto.type_goals,
                     indikator: dto.indikator,
@@ -428,15 +435,16 @@ let GoalsService = class GoalsService {
             throw new common_1.ForbiddenException('You dont have privileges.');
         }
         let editGoal = null;
+        const newMap = JSON.parse(dto.NewMap);
         try {
-            for (const queryKey of Object.keys(dto.NewMap)) {
-                const obj = JSON.parse(dto.NewMap[queryKey]);
+            for (const queryKey of Object.keys(newMap)) {
+                const obj = newMap[queryKey];
                 if (obj.parent_goals == '0' && obj.id_goals != '1') {
                     throw new common_1.BadRequestException('Parent node is cannot more than one');
                 }
             }
-            for (const queryKey of Object.keys(dto.NewMap)) {
-                const obj = JSON.parse(dto.NewMap[queryKey]);
+            for (const queryKey of Object.keys(newMap)) {
+                const obj = newMap[queryKey];
                 editGoal = await this.prisma.$queryRaw `update goals set parent_goals = ${obj.parent_goals}, pic_goals = ${obj.pic_goals} where id_goals = ${obj.id_goals};`;
             }
             if (editGoal) {

@@ -20,4 +20,5 @@ __exportStar(require("./userdet.dto"), exports);
 __exportStar(require("./goals.dto"), exports);
 __exportStar(require("./addgoals.dto"), exports);
 __exportStar(require("./editgoals.dto"), exports);
+__exportStar(require("./area.dto"), exports);
 //# sourceMappingURL=index.js.map

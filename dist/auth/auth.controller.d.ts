@@ -17,7 +17,7 @@ export declare class AuthController {
         userData: {
             id: number;
             name: string;
-            role: string;
+            role: any;
             email: string;
             fullname: string;
             id_area: number;
