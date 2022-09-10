@@ -1,7 +1,7 @@
 import { PrismaService } from "../prisma/prisma.service";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
-import { tbl_users } from '@prisma/client';
+import { tbl_goals, tbl_users } from '@prisma/client';
 export declare class GoalsService {
     private config;
     private prisma;
@@ -45,4 +45,15 @@ export declare class GoalsService {
         data: any;
     }>;
     delgoal(user: tbl_users, id_goals: number): Promise<any>;
+    initialGoals(user: tbl_users): Promise<{
+        statusCode: number;
+        message: string;
+        data: tbl_goals[];
+    }>;
+    childGoals(user: tbl_users, parent_goals: any): Promise<any[] | {
+        statusCode: number;
+        message: string;
+        data: any[];
+    }>;
+    subchildGoals(parent_goals: any): Promise<tbl_goals[] | []>;
 }

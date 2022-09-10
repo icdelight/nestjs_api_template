@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import {IsDate, IsInt, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class AddGoalsDto {
@@ -15,13 +16,16 @@ export class AddGoalsDto {
 
     @IsDate()
     @IsNotEmpty()
+    @Type(() => Date)
     start_date: Date;
 
     @IsDate()
     @IsNotEmpty()
+    @Type(() => Date)
     due_date: Date;
 
     @IsNumber()
     @IsNotEmpty()
+    @Type(() => Number)
     parent_goals: number;
 }

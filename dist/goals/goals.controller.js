@@ -16,6 +16,7 @@ exports.GoalsController = void 0;
 const common_1 = require("@nestjs/common");
 const goals_service_1 = require("./goals.service");
 const decorator_1 = require("../auth/decorator");
+const dto_1 = require("../auth/dto");
 const guard_1 = require("../auth/guard");
 let GoalsController = class GoalsController {
     constructor(goalService) {
@@ -24,6 +25,12 @@ let GoalsController = class GoalsController {
     allGoals(user) {
         return this.goalService.allgoal(user);
     }
+    initialGoals(user) {
+        return this.goalService.initialGoals(user);
+    }
+    childGoals(user, parent_goals) {
+        return this.goalService.childGoals(user, parent_goals);
+    }
     alltreeGoals(user) {
         return this.goalService.alltreegoal(user);
     }
@@ -31,7 +38,6 @@ let GoalsController = class GoalsController {
         return this.goalService.allgoaladmin(user);
     }
     addGoals(user, dto) {
-        console.log(dto);
         return this.goalService.addgoal(user, dto);
     }
     editGoals(user, dto) {
@@ -51,6 +57,23 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], GoalsController.prototype, "allGoals", null);
+__decorate([
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Get)('initialgoals'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], GoalsController.prototype, "initialGoals", null);
+__decorate([
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Post)('childgoals'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __param(1, (0, common_1.Body)('parent_goals', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Number]),
+    __metadata("design:returntype", void 0)
+], GoalsController.prototype, "childGoals", null);
 __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, common_1.Post)('alltreegoals'),
@@ -73,7 +96,7 @@ __decorate([
     __param(0, (0, decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, dto_1.AddGoalsDto]),
     __metadata("design:returntype", void 0)
 ], GoalsController.prototype, "addGoals", null);
 __decorate([

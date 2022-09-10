@@ -46,9 +46,9 @@ function recurseTree(allGoal, parent) {
                     parentGoal[key]["status_goals"] = obj['status_goals'];
                     parentGoal[key]["progress"] = obj['progress'];
                     parentGoal[key]["parent_goals"] = obj['parent_goals'];
-                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ? JSON.parse(obj['type_goals']) : style_col;
+                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ? (obj['type_goals']) : style_col;
                     parentGoal[key]["last_modified_date"] = obj['firstName'];
-                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ? JSON.parse(obj['indikator']) : indikator;
+                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ? (obj['indikator']) : indikator;
                 }
             });
             if (allGoal[key]) {
@@ -108,6 +108,31 @@ function recurseTreeAdmin(allGoal, parent) {
         });
     }
     return resTree;
+}
+function convertToGoalsArray(tbl_goals) {
+    let resData = [];
+    let i = 1;
+    let finalData = {};
+    tbl_goals.forEach(function (element) {
+        var stringID = `${element.id_goals}`;
+        console.log('iterator', stringID);
+        finalData[stringID] = {};
+        finalData[stringID]["id_goals"] = element.id_goals ? element.id_goals : null;
+        finalData[stringID]["title_goals"] = element.title_goals ? element.title_goals : null;
+        finalData[stringID]["desc_goals"] = element.desc_goals ? element.desc_goals : null;
+        finalData[stringID]["pic_goals"] = element.pic_goals ? element.pic_goals : null;
+        finalData[stringID]["start_date"] = element.start_date ? element.start_date : null;
+        finalData[stringID]["due_date"] = element.due_date ? element.due_date : null;
+        finalData[stringID]["status_goals"] = element.status_goals ? element.status_goals : null;
+        finalData[stringID]["progress"] = element.progress ? element.progress : null;
+        finalData[stringID]["parent_goals"] = element.parent_goals ? element.parent_goals : null;
+        finalData[stringID]["type_goals"] = element.type_goals ? element.type_goals : null;
+        finalData[stringID]["indikator"] = element.indikator ? element.indikator : null;
+        finalData[stringID]["children"] = [];
+        resData[stringID] = finalData[stringID];
+        finalData = {};
+    });
+    return resData;
 }
 let GoalsService = class GoalsService {
     constructor(config, prisma, jwt) {
@@ -185,7 +210,7 @@ let GoalsService = class GoalsService {
             if (topGoal && topGoal.length > 0) {
                 topGoal.forEach(element => {
                     if (element !== null) {
-                        if (element.parent_goals != parent_id || parent_id == 0) {
+                        if (!allGoal.hasOwnProperty(element.parent_goals)) {
                             allGoal[element.parent_goals] = {};
                         }
                         allGoal[element.parent_goals][element.id_goals] = element;
@@ -211,7 +236,7 @@ let GoalsService = class GoalsService {
                 message = "Failed Inquiry Goals, Empty goals.";
                 resTree[0] = [];
             }
-            result = { "statusCode": statusCode, "message": message, "data": resTree[0] };
+            result = { "statusCode": statusCode, "message": message, "data": resTree };
         }
         catch (error) {
             console.log(error);
@@ -220,6 +245,7 @@ let GoalsService = class GoalsService {
         return result;
     }
     async allgoaladmin(user) {
+        console.log(user);
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
@@ -236,7 +262,7 @@ let GoalsService = class GoalsService {
             if (topGoal && topGoal.length != 0) {
                 topGoal.forEach(element => {
                     if (element !== null) {
-                        if (element.parent != parent_id || parent_id == 0) {
+                        if (!allGoal.hasOwnProperty(element.parent)) {
                             allGoal[element.parent] = {};
                         }
                         allGoal[element.parent][element.id] = element;
@@ -491,6 +517,58 @@ let GoalsService = class GoalsService {
         }
         let result = { "statusCode": statusCode, "message": message, "data": delGoal };
         return delGoal;
+    }
+    async initialGoals(user) {
+        const tbl_goals = await this.prisma.tbl_goals.findMany({
+            where: {
+                parent_goals: 0
+            }
+        });
+        if (!tbl_goals || tbl_goals.length <= 0) {
+            throw new common_1.NotFoundException("Data Tidak ditemukan");
+        }
+        const result = {
+            statusCode: 200,
+            message: "Berhasil mengambil data.",
+            data: tbl_goals
+        };
+        return result;
+    }
+    async childGoals(user, parent_goals) {
+        const tbl_goals = await this.prisma.tbl_goals.findMany({
+            where: {
+                parent_goals: parent_goals
+            }
+        });
+        if (!tbl_goals || tbl_goals.length <= 0) {
+            throw new common_1.NotFoundException("Data Tidak ditemukan");
+        }
+        else {
+            let currentData = convertToGoalsArray(tbl_goals);
+            for (const iterator of tbl_goals) {
+                const child = await this.subchildGoals(iterator.id_goals);
+                currentData[iterator.id_goals]["children"] = child;
+            }
+            var filtered = currentData.filter((el) => {
+                return el != null;
+            });
+            const response = {
+                statusCode: 200,
+                message: "Berhasil mengambil data",
+                data: filtered
+            };
+            return response;
+            console.log('currentData', currentData);
+            return currentData;
+        }
+    }
+    async subchildGoals(parent_goals) {
+        const tbl_goals = await this.prisma.tbl_goals.findMany({
+            where: {
+                parent_goals: parent_goals
+            }
+        });
+        return tbl_goals;
     }
 };
 GoalsService = __decorate([

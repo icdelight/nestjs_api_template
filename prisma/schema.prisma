@@ -55,9 +55,9 @@ model tbl_goals {
   status_goals       Int?
   progress           Int?
   parent_goals       Int?
-  type_goals         String?   @db.VarChar(250)
+  type_goals         Json?   
   last_modified_date DateTime? @default(now()) @db.DateTime(0)
-  indikator          String?   @db.VarChar(500)
+  indikator          Json?   
 
   @@map("goals")
 }
