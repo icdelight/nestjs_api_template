@@ -206,27 +206,34 @@ export class GoalsService {
                 }
             });
             let parent_id = 0;
-            topGoal.forEach(element => {
-                if(element !== null) {
-                    if(element.parent_goals != parent_id || parent_id == 0) {
-                        allGoal[element.parent_goals] = {};
-                    }
-                    allGoal[element.parent_goals][element.id_goals] = element;
-                    parent_id = element.parent_goals;
-                }
-            });
             
-            let obj = [];
-            parent_id = 0;
-            let parentGoal = {};
-            let ChildGoal = [];
-            resTree = recurseTree(allGoal,"0");
-            if(resTree[0] !== undefined) {
-                statusCode = 200;
-                message = "Success Inquiry Goals.";
+            if(topGoal && topGoal.length > 0) {
+                topGoal.forEach(element => {
+                    if(element !== null) {
+                        if(element.parent_goals != parent_id || parent_id == 0) {
+                            allGoal[element.parent_goals] = {};
+                        }
+                        allGoal[element.parent_goals][element.id_goals] = element;
+                        parent_id = element.parent_goals;
+                    }
+                });
+                // console.log();
+                let obj = [];
+                parent_id = 0;
+                let parentGoal = {};
+                let ChildGoal = [];
+                resTree = recurseTree(allGoal,"0");
+                if(resTree[0] !== undefined) {
+                    statusCode = 200;
+                    message = "Success Inquiry Goals.";
+                }else{
+                    statusCode = 0;
+                    message = "Failed Inquiry Goals.";
+                }
             }else{
                 statusCode = 0;
-                message = "Failed Inquiry Goals.";
+                message = "Failed Inquiry Goals, Empty goals.";
+                resTree[0] = [];
             }
             result = {"statusCode":statusCode,"message":message,"data":resTree[0]};
         }catch(error) {
@@ -254,7 +261,7 @@ export class GoalsService {
             //     }
             // });
             topGoal = await this.prisma.$queryRaw`select id_goals as id, title_goals as title, desc_goals as description, pic_goals as pic,b.firstName, start_date, due_date, status_goals, parent_goals as parent, type_goals, last_modified_date, progress, indikator from goals a inner join users b on a.pic_goals = b.name order by parent_goals asc;`;
-            console.log(topGoal);
+            // console.log(topGoal);
             let parent_id = 0;
             if(topGoal && topGoal.length != 0) {
                 topGoal.forEach(element => {
@@ -266,6 +273,7 @@ export class GoalsService {
                         parent_id = element.parent;
                     }
                 });
+                console.log(allGoal);
                 let obj = [];
                 parent_id = 0;
                 let parentGoal = {};
@@ -365,7 +373,6 @@ export class GoalsService {
     }
 
     async addgoal(user: tbl_users, dto : any) {
-        console.log(dto);
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
@@ -379,8 +386,8 @@ export class GoalsService {
                     title_goals: dto.title_goals,
                     desc_goals: dto.desc_goals,
                     pic_goals: dto.pic_goals,
-                    start_date: dto.start_date,
-                    due_date: dto.due_date,
+                    start_date: new Date(dto.start_date),
+                    due_date: new Date(dto.due_date),
                     status_goals: Number("1"),
                     progress: Number("0"),
                     parent_goals: Number.isInteger(dto.parent_goals)?dto.parent_goals:Number(dto.parent_goals),
@@ -396,7 +403,7 @@ export class GoalsService {
                 message = "Failed Add Goals.";
             }
         }catch(error) {
-            // console.log(error);
+            console.log(error);
             throw new InternalServerErrorException(error);
         }
         let result = {"statusCode":statusCode,"message":message,"data":addGoal};
@@ -417,8 +424,8 @@ export class GoalsService {
                     title_goals: dto.title_goals,
                     desc_goals: dto.desc_goals,
                     pic_goals: dto.pic_goals,
-                    start_date: dto.start_date,
-                    due_date: dto.due_date,
+                    start_date: new Date(dto.start_date),
+                    due_date: new Date(dto.due_date),
                     status_goals: Number.isInteger(dto.status)?dto.status:Number(dto.status),
                     type_goals: dto.type_goals,
                     indikator: dto.indikator,
@@ -450,17 +457,18 @@ export class GoalsService {
             throw new ForbiddenException('You dont have privileges.');
         }
         let editGoal = null;
-
+        const newMap = JSON.parse(dto.NewMap);
+        // console.log(newMap);
         try {
-            for (const queryKey of Object.keys(dto.NewMap)) {
-                const obj = JSON.parse(dto.NewMap[queryKey]);
+            for (const queryKey of Object.keys(newMap)) {
+                const obj = newMap[queryKey];
                 if(obj.parent_goals == '0' && obj.id_goals != '1') {
                     throw new BadRequestException('Parent node is cannot more than one');
                 }
             }
-            for (const queryKey of Object.keys(dto.NewMap)) {
+            for (const queryKey of Object.keys(newMap)) {
                 // console.log(queryKey,`${dto.NewMap[queryKey]}`);
-                const obj = JSON.parse(dto.NewMap[queryKey]);
+                const obj = newMap[queryKey];
                 // console.log(obj);
                 editGoal = await this.prisma.$queryRaw`update goals set parent_goals = ${obj.parent_goals}, pic_goals = ${obj.pic_goals} where id_goals = ${obj.id_goals};`;
                 // console.log(obj.id_goals,`update goals set parent_goals = ${obj.parent_goals}, pic_goals = ${obj.pic_goals} where id_goals = ${obj.id_goals};`);
