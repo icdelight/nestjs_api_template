@@ -123,11 +123,16 @@ let UserServices = class UserServices {
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
-        if (user.role != "1") {
+        if (user.role != "1" && user.role != "2") {
             throw new common_1.ForbiddenException('You dont have privileges.');
         }
         let users = null;
-        users = await this.prisma.$queryRaw `SELECT name,pass,flag_active,createdAt,updatedAt,firstName,lastName,apps,role,c.role_name,a.id_area as id_area,desc_area,a.id_sub_area as id_sub_area,desc_sub_area,id_parent_area FROM users a INNER JOIN roles c ON a.role = c.id_role LEFT JOIN mst_area b ON a.id_sub_area = b.id_sub_area WHERE a.flag_active = 1;`;
+        if (user.role == '1') {
+            users = await this.prisma.$queryRaw `SELECT name,pass,flag_active,createdAt,updatedAt,firstName,lastName,apps,role,c.role_name,a.id_area as id_area,desc_area,a.id_sub_area as id_sub_area,desc_sub_area,id_parent_area FROM users a INNER JOIN roles c ON a.role = c.id_role LEFT JOIN mst_area b ON a.id_sub_area = b.id_sub_area WHERE a.flag_active = 1;`;
+        }
+        else {
+            users = await this.prisma.$queryRaw `SELECT name,pass,flag_active,createdAt,updatedAt,firstName,lastName,apps,role,c.role_name,a.id_area as id_area,desc_area,a.id_sub_area as id_sub_area,desc_sub_area,id_parent_area FROM users a INNER JOIN roles c ON a.role = c.id_role LEFT JOIN mst_area b ON a.id_sub_area = b.id_sub_area WHERE a.flag_active = 1 AND a.id_area = ${user.id_area};`;
+        }
         if (users) {
             statusCode = 200;
             message = "Success inquiry user";

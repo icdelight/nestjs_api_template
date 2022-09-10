@@ -28,7 +28,9 @@ export declare class AuthServices {
             email: string;
             fullname: string;
             id_area: number;
+            desc_area: any;
             id_sub_area: number;
+            desc_sub_area: any;
         };
     }>;
 }

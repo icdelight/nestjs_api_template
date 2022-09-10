@@ -68,16 +68,24 @@ let AreaServices = class AreaServices {
         if (user.role != "1" && user.role != "2") {
             throw new common_1.ForbiddenException('You dont have privileges.');
         }
-        let where = "";
-        if (user.role == "2") {
-            where = `id_area = ${user.id_area}`;
+        if (user.role != '1' && dto.id_area != undefined && user.id_area != dto.id_area) {
+            throw new common_1.ForbiddenException('You dont have privileges.');
         }
-        let allArea = {};
         let topArea = [];
-        let parent_id = 0;
-        let resArea = [];
         try {
-            topArea = await this.prisma.$queryRaw `SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area {where} order by a.id_area asc, a.id_parent_area asc;`;
+            console.log(user.role);
+            if (dto.id_area != undefined && user.role == '1') {
+                topArea = await this.prisma.$queryRaw `SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_area = ${dto.id_area} AND a.id_sub_area != ${dto.id_sub_area} order by a.id_area asc, a.id_parent_area asc;`;
+                console.log(`SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_area = ${dto.id_area} order by a.id_area asc, a.id_parent_area asc;`);
+            }
+            else if (user.role == '2') {
+                topArea = await this.prisma.$queryRaw `SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_area = ${user.id_area} AND a.id_sub_area != ${dto.id_sub_area} order by a.id_area asc, a.id_parent_area asc;`;
+                console.log(`SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_area = ${user.id_area} order by a.id_area asc, a.id_parent_area asc;`);
+            }
+            else {
+                topArea = await this.prisma.$queryRaw `SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area order by a.id_area asc, a.id_parent_area asc;`;
+                console.log(`SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area order by a.id_area asc, a.id_parent_area asc;`);
+            }
             if (topArea) {
                 statusCode = 200;
                 message = "Success inquiry area";
@@ -184,7 +192,7 @@ let AreaServices = class AreaServices {
                 }
                 else {
                     statusCode = 0;
-                    message = `Failed inquiry area, no data found at page : ${dto.page}`;
+                    message = `Failed inquiry area, no data found at page : ${dto.page}, filter : ${dto.search}`;
                 }
             }
             else {
@@ -304,10 +312,10 @@ let AreaServices = class AreaServices {
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
-        if (user.role != "1") {
+        if (user.role != "1" && user.role != "2") {
             throw new common_1.ForbiddenException('You dont have privileges.');
         }
-        if (user.id_area != dto.id_area && user.id_area != 1) {
+        if (user.id_area != dto.id_area && user.id_area == 2) {
             throw new common_1.ForbiddenException('You dont have privileges.');
         }
         let addArea = null;
@@ -342,7 +350,7 @@ let AreaServices = class AreaServices {
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
-        if (user.role != "1") {
+        if (user.role != "1" && user.role != "2") {
             throw new common_1.ForbiddenException('You dont have privileges.');
         }
         if (user.id_area != dto.id_area && user.id_area != 1) {
@@ -352,7 +360,6 @@ let AreaServices = class AreaServices {
         try {
             editArea = await this.prisma.mst_area.updateMany({
                 data: {
-                    desc_area: dto.desc_area,
                     desc_sub_area: dto.desc_sub_area,
                     id_parent_area: Number.isInteger(dto.id_parent_area) ? dto.id_parent_area : Number(dto.id_parent_area),
                     active: Number.isInteger(dto.active) ? dto.active : Number(dto.active),

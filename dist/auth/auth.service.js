@@ -84,7 +84,7 @@ let AuthServices = class AuthServices {
     async signin(dto) {
         let statusCode = 999;
         let message = "Something went wrong";
-        const user = await this.prisma.$queryRaw `SELECT a.*,b.role_name as role_name FROM users a INNER JOIN roles b ON a.role = b.id_role WHERE a.name = ${dto.user} and a.flag_active = 1;`;
+        const user = await this.prisma.$queryRaw `SELECT a.*,b.role_name as role_name,c.desc_area as desc_area,c.desc_sub_area as desc_sub_area FROM users a INNER JOIN roles b ON a.role = b.id_role LEFT JOIN mst_area c ON a.id_sub_area = c.id_sub_area WHERE a.name = ${dto.user} and a.flag_active = 1;`;
         if (!user) {
             throw new common_1.ForbiddenException('Credential incorrect.');
         }
@@ -105,7 +105,9 @@ let AuthServices = class AuthServices {
             email: user[0].firstName,
             fullname: `${user[0].firstName} ${user[0].lastName !== null ? user[0].lastName : ''}`,
             id_area: user[0].id_area,
+            desc_area: user[0]['desc_area'],
             id_sub_area: user[0].id_sub_area,
+            desc_sub_area: user[0]['desc_sub_area'],
         };
         if (tokens.access_token.length != 0) {
             statusCode = 200;

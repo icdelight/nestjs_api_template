@@ -73,14 +73,7 @@ export class AuthServices{
     async signin(dto : AuthDto){
         let statusCode = 999;
         let message = "Something went wrong";
-        //find user
-        // const user = await this.prisma.tbl_users.findFirst({
-        //     where : {
-        //         name : dto.user,
-        //         flag_active: true,
-        //     }
-        // })
-        const user = await this.prisma.$queryRaw<tbl_users[]>`SELECT a.*,b.role_name as role_name FROM users a INNER JOIN roles b ON a.role = b.id_role WHERE a.name = ${dto.user} and a.flag_active = 1;`;
+        const user = await this.prisma.$queryRaw<tbl_users[]>`SELECT a.*,b.role_name as role_name,c.desc_area as desc_area,c.desc_sub_area as desc_sub_area FROM users a INNER JOIN roles b ON a.role = b.id_role LEFT JOIN mst_area c ON a.id_sub_area = c.id_sub_area WHERE a.name = ${dto.user} and a.flag_active = 1;`;
         // const user = await this.prisma.$queryRaw`SELECT name,pass,flag_active,createdAt,updatedAt,firstName,lastName,apps,role,a.id_area as id_area,desc_area,a.id_sub_area as id_sub_area,desc_sub_area,id_parent_area FROM users a INNER JOIN mst_area b ON a.id_sub_area = b.id_sub_area WHERE a.name = ${dto.user} and a.flag_active = 1;`;
         //if user doesnt exist
         if(!user) {
@@ -109,7 +102,9 @@ export class AuthServices{
             email: user[0].firstName,
             fullname: `${user[0].firstName} ${user[0].lastName !== null ? user[0].lastName : '' }`,
             id_area : user[0].id_area,
+            desc_area : user[0]['desc_area'],
             id_sub_area : user[0].id_sub_area,
+            desc_sub_area : user[0]['desc_sub_area'],
         };
         if(tokens.access_token.length != 0) {
             statusCode = 200;
