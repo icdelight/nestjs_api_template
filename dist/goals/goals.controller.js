@@ -41,8 +41,6 @@ let GoalsController = class GoalsController {
         return this.goalService.addgoal(user, dto);
     }
     editGoals(user, dto) {
-        console.log(dto);
-        console.log(dto.id_goals);
         return this.goalService.editgoal(user, dto);
     }
     remapGoals(user, dto) {
@@ -105,7 +103,7 @@ __decorate([
     __param(0, (0, decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, dto_1.EditGoalsDto]),
     __metadata("design:returntype", void 0)
 ], GoalsController.prototype, "editGoals", null);
 __decorate([

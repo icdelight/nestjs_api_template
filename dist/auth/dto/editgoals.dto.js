@@ -10,42 +10,47 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EditGoalsDto = void 0;
+const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 class EditGoalsDto {
 }
 __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsNotEmpty)(),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], EditGoalsDto.prototype, "id_goals", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], EditGoalsDto.prototype, "title_goals", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], EditGoalsDto.prototype, "desc_goals", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], EditGoalsDto.prototype, "pic_goals", void 0);
 __decorate([
     (0, class_validator_1.IsDate)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Date),
     __metadata("design:type", Date)
 ], EditGoalsDto.prototype, "start_date", void 0);
 __decorate([
     (0, class_validator_1.IsDate)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Date),
     __metadata("design:type", Date)
 ], EditGoalsDto.prototype, "due_date", void 0);
 __decorate([
     (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], EditGoalsDto.prototype, "status", void 0);
 exports.EditGoalsDto = EditGoalsDto;

@@ -9,6 +9,7 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { tbl_goals, tbl_users } from '@prisma/client';
 import { sleep } from "pactum";
+import { GoalRepository } from "./goals.repository";
 
 
 function recurseTree(allGoal,parent) {
@@ -94,10 +95,10 @@ function recurseTreeAdmin(allGoal,parent) {
                     parentGoal[key]["status_goals"] = obj['status_goals'];
                     parentGoal[key]["progress"] = obj['progress'];
                     parentGoal[key]["parent"] = obj['parent'];
-                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ?JSON.parse(obj['type_goals']):style_col;
+                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ?(obj['type_goals']):style_col;
                     parentGoal[key]["last_modified_date"] = obj['last_modified_date'];
                     parentGoal[key]["firstName"] = obj['name'];
-                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?JSON.parse(obj['indikator']):indikator;
+                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?(obj['indikator']):indikator;
                 }
             });
 
@@ -140,16 +141,12 @@ function convertToGoalsArray(tbl_goals)
         finalData = {}
     });
     
-    // var filtered = resData.filter((el) => {
-    //     return el != null;
-    // })
-    // console.log('resData', filtered[2])
     return resData;
 }
 
 @Injectable()
 export class GoalsService {
-    constructor(private config: ConfigService, private prisma: PrismaService, private jwt: JwtService) {}
+    constructor(private goalRepo: GoalRepository, private config: ConfigService, private prisma: PrismaService, private jwt: JwtService) {}
     
     async allgoal(user: tbl_users) {
         let statusCode = 999;
@@ -411,6 +408,7 @@ export class GoalsService {
             throw new ForbiddenException('You dont have privileges.');
         }
         let addGoal = null;
+
         try {
             addGoal = await this.prisma.tbl_goals.create({
                 data: {
@@ -427,11 +425,38 @@ export class GoalsService {
                 }
             });
             if(addGoal) {
+                if(addGoal.parent_goals == 0){
+                    const updateKodefikasi = await this.goalRepo.updateKodefikasi(addGoal.id_goals, null);
+                    if(!updateKodefikasi)
+                    {
+                        await this.goalRepo.deleteGoal(addGoal.id_goals);
+                        const result = {
+                            statusCode : 0,
+                            message : "Failed Add Goal."
+                        }
+                        return result;
+                    }
+                }else{
+                    const coba = await this.goalRepo.getGoal(addGoal.parent_goals);
+                    if(coba)
+                    {
+                        const updateKodefikasi = await this.goalRepo.updateKodefikasi(addGoal.id_goals, coba.kodefikasi);
+                        if(!updateKodefikasi)
+                        {
+                            await this.goalRepo.deleteGoal(addGoal.id_goals);
+                            const result = {
+                                statusCode : 0,
+                                message : "Failed Add Goal."
+                            }
+                            return result;
+                        }
+                    }
+                }
                 statusCode = 200;
-                message = "Success Add Goals.";
+                message = "Success Add Goal.";
             }else{
                 statusCode = 0;
-                message = "Failed Add Goals.";
+                message = "Failed Add Goal.";
             }
         }catch(error) {
             console.log(error);
@@ -451,16 +476,7 @@ export class GoalsService {
         let editGoal = null;
         try {
             editGoal = await this.prisma.tbl_goals.updateMany({
-                data: {
-                    title_goals: dto.title_goals,
-                    desc_goals: dto.desc_goals,
-                    pic_goals: dto.pic_goals,
-                    start_date: new Date(dto.start_date),
-                    due_date: new Date(dto.due_date),
-                    status_goals: Number.isInteger(dto.status)?dto.status:Number(dto.status),
-                    type_goals: dto.type_goals,
-                    indikator: dto.indikator,
-                },
+                data: dto,
                 where: {
                     id_goals : Number.isInteger(dto.id_goals)?dto.id_goals:Number(dto.id_goals),
                 }

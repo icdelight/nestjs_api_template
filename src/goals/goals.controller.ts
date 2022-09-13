@@ -4,7 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { tbl_users } from '@prisma/client';
 import { query, Request } from 'express';
 import { GetUser } from '../auth/decorator';
-import { AddGoalsDto } from '../auth/dto';
+import { AddGoalsDto, EditGoalsDto } from '../auth/dto';
 import { JwtGuard } from '../auth/guard';
 
 @UseGuards(JwtGuard)
@@ -44,17 +44,17 @@ export class GoalsController {
 
     @HttpCode(HttpStatus.OK)
     @Post('addgoals')
-    addGoals(@GetUser() user: tbl_users,  @Body() dto: AddGoalsDto) {
-        // console.log(dto);
+    addGoals(@GetUser() user: tbl_users,  @Body() dto : AddGoalsDto) {
         return this.goalService.addgoal(user,dto);
     }
 
     @HttpCode(HttpStatus.OK)
     @Post('editgoals')
-    editGoals(@GetUser() user: tbl_users,  @Body() dto: any) {
-        console.log(dto);
+    editGoals(@GetUser() user: tbl_users,  @Body() dto: EditGoalsDto) {
+        // console.log(dto);
         // const req = JSON.parse(dto);
-        console.log(dto.id_goals);
+        // console.log(dto.id_goals);
+        // return true;
         return this.goalService.editgoal(user,dto);
     }
 

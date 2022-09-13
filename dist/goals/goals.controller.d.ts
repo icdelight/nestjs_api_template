@@ -1,6 +1,6 @@
 import { GoalsService } from "./goals.service";
 import { tbl_users } from '@prisma/client';
-import { AddGoalsDto } from '../auth/dto';
+import { AddGoalsDto, EditGoalsDto } from '../auth/dto';
 export declare class GoalsController {
     private goalService;
     constructor(goalService: GoalsService);
@@ -28,9 +28,8 @@ export declare class GoalsController {
     addGoals(user: tbl_users, dto: AddGoalsDto): Promise<{
         statusCode: number;
         message: string;
-        data: any;
     }>;
-    editGoals(user: tbl_users, dto: any): Promise<{
+    editGoals(user: tbl_users, dto: EditGoalsDto): Promise<{
         statusCode: number;
         message: string;
         data: any;
