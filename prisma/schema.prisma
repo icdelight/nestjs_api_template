@@ -70,3 +70,13 @@ model mst_area {
   id_parent_area Int?
   active         Int?
 }
+
+model cluster {
+  id_cluster   Int       @id @default(autoincrement())
+  nama_cluster String?   @db.VarChar(255)
+  id_area      Int?
+  id_sub_area  Int?
+  flag_active  Int?
+  createdAt    DateTime? @db.DateTime(0)
+  modifiedAt   DateTime? @db.DateTime(0)
+}
