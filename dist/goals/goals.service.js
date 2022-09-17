@@ -116,7 +116,6 @@ function convertToGoalsArray(tbl_goals) {
     let finalData = {};
     tbl_goals.forEach(function (element) {
         var stringID = `${element.id_goals}`;
-        console.log('iterator', stringID);
         finalData[stringID] = {};
         finalData[stringID]["id_goals"] = element.id_goals ? element.id_goals : null;
         finalData[stringID]["title_goals"] = element.title_goals ? element.title_goals : null;
@@ -134,6 +133,34 @@ function convertToGoalsArray(tbl_goals) {
         finalData = {};
     });
     return resData;
+}
+function recurseBuildTree(goals, parent, kodefikasi = 'GOAL') {
+    let final = [];
+    let filterGoals = goals.filter((element, idx, array) => {
+        return element.parent_goals == parent;
+    });
+    let nextParent = null;
+    filterGoals.forEach((element, index, array) => {
+        nextParent = element.id_goals;
+        final[(element.id_goals)] = {};
+        final[(element.id_goals)]['id_goals'] = element.id_goals;
+        final[(element.id_goals)]['parent_goals'] = element.parent_goals;
+        final[(element.id_goals)]['parent_family'] = element.parent_family;
+        final[(element.id_goals)]['title_goals'] = element.title_goals;
+        final[(element.id_goals)]['desc_goals'] = element.desc_goals;
+        final[(element.id_goals)]['pic_goals'] = element.pic_goals;
+        final[(element.id_goals)]['start_date'] = element.start_date;
+        final[(element.id_goals)]['due_date'] = element.due_date;
+        final[(element.id_goals)]['status_goals'] = element.status_goals;
+        final[(element.id_goals)]['indikator'] = element.indikator;
+        final[(element.id_goals)]['type_goals'] = element.type_goals;
+        final[(element.id_goals)]['kodefikasi'] = kodefikasi + '-' + element.id_goals.toString();
+        final[(element.id_goals)]['children'] = recurseBuildTree(goals, nextParent, kodefikasi + '-' + element.id_goals.toString());
+    });
+    var filteredFinal = final.filter((el) => {
+        return el != null;
+    });
+    return filteredFinal;
 }
 let GoalsService = class GoalsService {
     constructor(goalRepo, config, prisma, jwt) {
@@ -383,25 +410,25 @@ let GoalsService = class GoalsService {
         if (user.role != "1") {
             throw new common_1.ForbiddenException('You dont have privileges.');
         }
-        let addGoal = null;
+        var finalData = null;
         try {
-            addGoal = await this.prisma.tbl_goals.create({
-                data: {
-                    title_goals: dto.title_goals,
-                    desc_goals: dto.desc_goals,
-                    pic_goals: dto.pic_goals,
-                    start_date: new Date(dto.start_date),
-                    due_date: new Date(dto.due_date),
-                    status_goals: Number("1"),
-                    progress: Number("0"),
-                    parent_goals: Number.isInteger(dto.parent_goals) ? dto.parent_goals : Number(dto.parent_goals),
-                    type_goals: dto.type_goals,
-                    indikator: dto.indikator,
-                }
+            const addGoal = await this.goalRepo.createGoal({
+                title_goals: dto.title_goals,
+                desc_goals: dto.desc_goals,
+                pic_goals: dto.pic_goals,
+                start_date: new Date(dto.start_date),
+                due_date: new Date(dto.due_date),
+                status_goals: Number("1"),
+                progress: Number("0"),
+                parent_goals: Number.isInteger(dto.parent_goals) ? dto.parent_goals : Number(dto.parent_goals),
+                type_goals: dto.type_goals,
+                indikator: dto.indikator,
             });
+            finalData = addGoal;
             if (addGoal) {
                 if (addGoal.parent_goals == 0) {
-                    const updateKodefikasi = await this.goalRepo.updateKodefikasi(addGoal.id_goals, null);
+                    const updateKodefikasi = await this.goalRepo.updateKodefikasi(addGoal.id_goals, addGoal);
+                    finalData = updateKodefikasi;
                     if (!updateKodefikasi) {
                         await this.goalRepo.deleteGoal(addGoal.id_goals);
                         const result = {
@@ -412,9 +439,10 @@ let GoalsService = class GoalsService {
                     }
                 }
                 else {
-                    const coba = await this.goalRepo.getGoal(addGoal.parent_goals);
-                    if (coba) {
-                        const updateKodefikasi = await this.goalRepo.updateKodefikasi(addGoal.id_goals, coba.kodefikasi);
+                    const parentCode = await this.goalRepo.getGoal(addGoal.parent_goals);
+                    if (parentCode) {
+                        const updateKodefikasi = await this.goalRepo.updateKodefikasi(addGoal.id_goals, parentCode);
+                        finalData = updateKodefikasi;
                         if (!updateKodefikasi) {
                             await this.goalRepo.deleteGoal(addGoal.id_goals);
                             const result = {
@@ -434,27 +462,20 @@ let GoalsService = class GoalsService {
             }
         }
         catch (error) {
-            console.log(error);
             throw new common_1.InternalServerErrorException(error);
         }
-        let result = { "statusCode": statusCode, "message": message, "data": addGoal };
+        let result = { "statusCode": statusCode, "message": message, "data": finalData };
         return result;
     }
     async editgoal(user, dto) {
         let statusCode = 999;
         let message = "Something went wrong.";
-        let data = null;
         if (user.role != "1") {
             throw new common_1.ForbiddenException('You dont have privileges.');
         }
         let editGoal = null;
         try {
-            editGoal = await this.prisma.tbl_goals.updateMany({
-                data: dto,
-                where: {
-                    id_goals: Number.isInteger(dto.id_goals) ? dto.id_goals : Number(dto.id_goals),
-                }
-            });
+            editGoal = await this.goalRepo.updateGoals(dto.id_goals, dto);
             if (editGoal) {
                 statusCode = 200;
                 message = "Success Edit Goals.";
@@ -576,8 +597,6 @@ let GoalsService = class GoalsService {
                 data: filtered
             };
             return response;
-            console.log('currentData', currentData);
-            return currentData;
         }
     }
     async subchildGoals(parent_goals) {
@@ -587,6 +606,27 @@ let GoalsService = class GoalsService {
             }
         });
         return tbl_goals;
+    }
+    async treeGoal(user, parent_goals) {
+        const param = {
+            where: {
+                parent_family: parent_goals
+            },
+            orderBy: {
+                parent_goals: 'asc'
+            }
+        };
+        const tbl_goals = await this.goalRepo.getGoals(param);
+        if (!tbl_goals || tbl_goals.length <= 0) {
+            throw new common_1.NotFoundException("Data Tidak ditemukan");
+        }
+        let final = recurseBuildTree(tbl_goals, 0);
+        const result = {
+            statusCode: 0,
+            message: "Berhasil mengambil data",
+            data: final
+        };
+        return result;
     }
 };
 GoalsService = __decorate([

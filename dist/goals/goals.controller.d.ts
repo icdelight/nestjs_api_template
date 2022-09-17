@@ -14,7 +14,7 @@ export declare class GoalsController {
         message: string;
         data: import(".prisma/client").tbl_goals[];
     }>;
-    childGoals(user: tbl_users, parent_goals: number): Promise<any[] | {
+    childGoals(user: tbl_users, parent_goals: number): Promise<{
         statusCode: number;
         message: string;
         data: any[];
@@ -38,5 +38,10 @@ export declare class GoalsController {
         statusCode: number;
         message: string;
         data: any;
+    }>;
+    treeGoals(user: tbl_users, dto: any): Promise<{
+        statusCode: number;
+        message: string;
+        data: any[];
     }>;
 }

@@ -65,4 +65,10 @@ export class GoalsController {
         return this.goalService.remapgoal(user,dto);
     }
 
+    @HttpCode(HttpStatus.OK)
+    @Post('treegoals')
+    treeGoals(@GetUser() user: tbl_users,  @Body('parent_goals', ParseIntPipe) dto: any) {
+        return this.goalService.treeGoal(user,dto);
+    }
+
 }

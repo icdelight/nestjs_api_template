@@ -58,6 +58,7 @@ model tbl_goals {
   type_goals         Json?   
   last_modified_date DateTime? @default(now()) @db.DateTime(0)
   indikator          Json?   
+  parent_family      Int?
   kodefikasi         String?   @db.Text
   @@map("goals")
 }
