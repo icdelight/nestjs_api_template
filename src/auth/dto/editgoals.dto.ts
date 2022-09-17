@@ -1,31 +1,36 @@
-import {IsDate, IsInt, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import {IsDate, IsInt, IsNotEmpty, isNotEmptyObject, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class EditGoalsDto {
     @IsNumber()
     @IsNotEmpty()
+    @Type(() => Number)
     id_goals: number;
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     title_goals: string;
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     desc_goals: string;
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     pic_goals: string;
 
     @IsDate()
-    @IsNotEmpty()
+    @IsOptional()
+    @Type(() => Date)
     start_date: Date;
 
     @IsDate()
-    @IsNotEmpty()
+    @IsOptional()
+    @Type(() => Date)
     due_date: Date;
 
     @IsNumber()
-    @IsNotEmpty()
+    @IsOptional()
+    @Type(() => Number)
     status: number;
 }

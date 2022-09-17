@@ -12,6 +12,7 @@ const jwt_1 = require("@nestjs/jwt");
 const goals_controller_1 = require("./goals.controller");
 const goals_service_1 = require("./goals.service");
 const strategy_1 = require("../auth/strategy");
+const goals_repository_1 = require("./goals.repository");
 let GoalsModule = class GoalsModule {
 };
 GoalsModule = __decorate([
@@ -20,7 +21,7 @@ GoalsModule = __decorate([
             jwt_1.JwtModule.register({}),
         ],
         controllers: [goals_controller_1.GoalsController],
-        providers: [goals_service_1.GoalsService, strategy_1.JwtStrategy],
+        providers: [goals_service_1.GoalsService, goals_repository_1.GoalRepository, strategy_1.JwtStrategy],
     })
 ], GoalsModule);
 exports.GoalsModule = GoalsModule;
