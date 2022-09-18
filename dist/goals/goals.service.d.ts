@@ -14,11 +14,15 @@ export declare class GoalsService {
         message: string;
         data: any;
     }>;
-    alltreegoal(user: tbl_users): Promise<any>;
+    alltreegoal(user: tbl_users): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     allgoaladmin(user: tbl_users): Promise<{
         statusCode: number;
         message: string;
-        data: any[];
+        data: any;
     }>;
     goalbyparentRec(user: tbl_users, id_goals: number): Promise<any>;
     goalbyid(user: tbl_users, id_goals: number): Promise<{
@@ -45,21 +49,30 @@ export declare class GoalsService {
         message: string;
         data: any;
     }>;
-    delgoal(user: tbl_users, id_goals: number): Promise<any>;
+    delgoal(user: tbl_users, id_goals: number): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     initialGoals(user: tbl_users): Promise<{
         statusCode: number;
         message: string;
-        data: tbl_goals[];
+        data: any;
     }>;
     childGoals(user: tbl_users, parent_goals: any): Promise<{
         statusCode: number;
         message: string;
-        data: any[];
+        data: any;
     }>;
     subchildGoals(parent_goals: any): Promise<tbl_goals[] | []>;
     treeGoal(user: tbl_users, parent_goals: any): Promise<{
         statusCode: number;
         message: string;
-        data: any[];
+        data: any;
+    }>;
+    searchGoal(user: tbl_users, searchTerm: any): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
     }>;
 }

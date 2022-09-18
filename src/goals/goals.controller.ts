@@ -71,4 +71,10 @@ export class GoalsController {
         return this.goalService.treeGoal(user,dto);
     }
 
+    @HttpCode(HttpStatus.OK)
+    @Post('searchgoals')
+    searchGoal(@GetUser() user: tbl_users,  @Body('searchTerm') searchTerm: string) {
+        return this.goalService.searchGoal(user,searchTerm);
+    }
+
 }

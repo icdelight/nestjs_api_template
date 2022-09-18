@@ -49,6 +49,9 @@ let GoalsController = class GoalsController {
     treeGoals(user, dto) {
         return this.goalService.treeGoal(user, dto);
     }
+    searchGoal(user, searchTerm) {
+        return this.goalService.searchGoal(user, searchTerm);
+    }
 };
 __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
@@ -127,6 +130,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], GoalsController.prototype, "treeGoals", null);
+__decorate([
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Post)('searchgoals'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __param(1, (0, common_1.Body)('searchTerm')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], GoalsController.prototype, "searchGoal", null);
 GoalsController = __decorate([
     (0, common_1.UseGuards)(guard_1.JwtGuard),
     (0, common_1.Controller)('goals'),

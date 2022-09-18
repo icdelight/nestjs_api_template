@@ -11,6 +11,15 @@ import { tbl_goals, tbl_users } from '@prisma/client';
 import { sleep } from "pactum";
 import { GoalRepository } from "./goals.repository";
 
+function response(statusCode: number, message: string, data:any)
+{
+    const response = {
+        statusCode: statusCode,
+        message: message,
+        data: data
+    };
+    return response;
+}
 
 function recurseTree(allGoal,parent) {
     let obj = [];
@@ -116,7 +125,7 @@ function recurseTreeAdmin(allGoal,parent) {
     return resTree;
 }
 
-function convertToGoalsArray(tbl_goals)
+function convertToGoalsArray(tbl_goals, kodefikasi = 'GOAL')
 {
     let resData = [];
     let i = 1;
@@ -135,6 +144,7 @@ function convertToGoalsArray(tbl_goals)
         finalData[stringID]["parent_goals"] = element.parent_goals? element.parent_goals : null
         finalData[stringID]["type_goals"] = element.type_goals? element.type_goals : null
         finalData[stringID]["indikator"] = element.indikator? element.indikator : null
+        finalData[stringID]["kodefikasi"] = kodefikasi+ '-' + element.id_goals
         finalData[stringID]["children"] = []
         resData[stringID] = finalData[stringID]
         finalData = {}
@@ -229,14 +239,13 @@ export class GoalsService {
         }catch(error) {
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":allGoal};
-        return result;
+        return response(statusCode,message,allGoal);
     }
 
     async alltreegoal(user: tbl_users) {
         let statusCode = 999;
         let message = "Something went wrong.";
-        let data = null;let result = null;
+        let data = null;
         if(user.role != "1" && user.role != "2" ) {
             throw new ForbiddenException('You dont have privileges.');
         }
@@ -291,12 +300,11 @@ export class GoalsService {
                 message = "Failed Inquiry Goals, Empty goals.";
                 resTree[0] = [];
             }
-            result = {"statusCode":statusCode,"message":message,"data":resTree};
         }catch(error) {
             console.log(error);
             throw new InternalServerErrorException(error);
         }
-        return result;
+        return response(statusCode,message,resTree);
     }
 
     async allgoaladmin(user: tbl_users) {
@@ -352,8 +360,7 @@ export class GoalsService {
             console.log(error)
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":resTree};
-        return result;
+        return response(statusCode,message,resTree);
     }
 
     async goalbyparentRec(user: tbl_users, id_goals: number) {
@@ -398,8 +405,7 @@ export class GoalsService {
         }catch(error) {
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":allGoal};
-        return result;
+        return response(statusCode,message,allGoal);
     }
     async goalbyparent(user: tbl_users, id_goals: number) {
         let statusCode = 999;
@@ -425,8 +431,7 @@ export class GoalsService {
         }catch(error) {
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":allGoal};
-        return result;
+        return response(statusCode,message,allGoal);
     }
 
     async addgoal(user: tbl_users, dto : any) {
@@ -492,8 +497,7 @@ export class GoalsService {
         }catch(error) {
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":finalData};
-        return result;
+        return response(statusCode,message,finalData);
     }
 
     async editgoal(user: tbl_users, dto : any) {
@@ -516,8 +520,7 @@ export class GoalsService {
             console.log(error);
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":editGoal};
-        return result;
+        return response(statusCode,message,editGoal);
     }
 
     async remapgoal(user: tbl_users, dto : any) {
@@ -556,8 +559,7 @@ export class GoalsService {
             console.log(error);
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":editGoal};
-        return result;
+        return response(statusCode,message,editGoal);
     }
 
     async delgoal(user: tbl_users, id_goals : number) {
@@ -584,8 +586,7 @@ export class GoalsService {
         }catch(error) {
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":delGoal};
-        return delGoal;
+        return response(statusCode,message,delGoal);
     }
 
     async initialGoals(user: tbl_users) {
@@ -598,16 +599,11 @@ export class GoalsService {
         {
             throw new NotFoundException("Data Tidak ditemukan");
         }
-        const result  = {
-            statusCode : 200,
-            message : "Berhasil mengambil data.",
-            data : tbl_goals
-        }
-        return result;
+        return response(0,"Berhasil ambil data",tbl_goals);
     }
 
     async childGoals(user: tbl_users, parent_goals) {
-        const tbl_goals = await this.prisma.tbl_goals.findMany({
+        const tbl_goals = await this.goalRepo.getGoals({
             where : {
                 parent_goals : parent_goals
             }
@@ -618,7 +614,10 @@ export class GoalsService {
         }else{
             let currentData = convertToGoalsArray(tbl_goals);
             for (const iterator of tbl_goals) {
-                const child = await this.subchildGoals(iterator.id_goals);
+                var child = await this.subchildGoals(iterator.id_goals);
+                for (const iterator of child) {
+                    iterator.kodefikasi = 'GOAL-'+iterator.parent_goals+'-'+iterator.id_goals
+                }
                 currentData[iterator.id_goals]["children"] = child;
             }
 
@@ -626,21 +625,17 @@ export class GoalsService {
                 return el != null;
             })
 
-            const response = {
-                statusCode : 200,
-                message : "Berhasil mengambil data",
-                data : filtered
-            }
-            return response;
+            return response(0,"Berhasil ambil data",filtered);
         }
     }
 
     async subchildGoals(parent_goals) : Promise<tbl_goals[] | []> {
-        const tbl_goals = await this.prisma.tbl_goals.findMany({
+        const filter : { where : any} = {
             where : {
                 parent_goals : parent_goals
             }
-        });
+        }
+        const tbl_goals = await this.goalRepo.getGoals(filter);
         return tbl_goals;
     }
     async  treeGoal(user : tbl_users, parent_goals) {
@@ -663,11 +658,28 @@ export class GoalsService {
             throw new NotFoundException("Data Tidak ditemukan");
         }
         let final = recurseBuildTree(tbl_goals, 0);
-        const result = {
-            statusCode : 0,
-            message: "Berhasil mengambil data",
-            data: final
+        return response(0,"Berhasil ambil data", final);
+    }
+
+    async searchGoal(user: tbl_users, searchTerm) {
+        if(searchTerm == null || searchTerm.trim().length < 8) {
+            throw new BadRequestException("Parameter pencarian kosong / kurang dari 8 karakter.")
         }
-        return result;
+        const filter = {
+            take: 5,
+            where : {
+                status_goals : 1,
+                title_goals : {
+                    contains : searchTerm
+                }
+            }
+        }
+        var searchRes = await this.goalRepo.getGoals(filter);
+        if(searchRes.length <= 0)
+        {
+            throw new NotFoundException("Data tidak ditemukan");
+        }
+        const result = convertToGoalsArray(searchRes);
+        return response(0,"Berhasil ambil data",result.filter((el) => { return el != null}));
     }
 }

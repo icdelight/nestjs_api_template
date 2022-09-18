@@ -15,6 +15,14 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const jwt_1 = require("@nestjs/jwt");
 const config_1 = require("@nestjs/config");
 const goals_repository_1 = require("./goals.repository");
+function response(statusCode, message, data) {
+    const response = {
+        statusCode: statusCode,
+        message: message,
+        data: data
+    };
+    return response;
+}
 function recurseTree(allGoal, parent) {
     let obj = [];
     let ChildGoal = [];
@@ -110,7 +118,7 @@ function recurseTreeAdmin(allGoal, parent) {
     }
     return resTree;
 }
-function convertToGoalsArray(tbl_goals) {
+function convertToGoalsArray(tbl_goals, kodefikasi = 'GOAL') {
     let resData = [];
     let i = 1;
     let finalData = {};
@@ -128,6 +136,7 @@ function convertToGoalsArray(tbl_goals) {
         finalData[stringID]["parent_goals"] = element.parent_goals ? element.parent_goals : null;
         finalData[stringID]["type_goals"] = element.type_goals ? element.type_goals : null;
         finalData[stringID]["indikator"] = element.indikator ? element.indikator : null;
+        finalData[stringID]["kodefikasi"] = kodefikasi + '-' + element.id_goals;
         finalData[stringID]["children"] = [];
         resData[stringID] = finalData[stringID];
         finalData = {};
@@ -201,14 +210,12 @@ let GoalsService = class GoalsService {
         catch (error) {
             throw new common_1.InternalServerErrorException(error);
         }
-        let result = { "statusCode": statusCode, "message": message, "data": allGoal };
-        return result;
+        return response(statusCode, message, allGoal);
     }
     async alltreegoal(user) {
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
-        let result = null;
         if (user.role != "1" && user.role != "2") {
             throw new common_1.ForbiddenException('You dont have privileges.');
         }
@@ -265,13 +272,12 @@ let GoalsService = class GoalsService {
                 message = "Failed Inquiry Goals, Empty goals.";
                 resTree[0] = [];
             }
-            result = { "statusCode": statusCode, "message": message, "data": resTree };
         }
         catch (error) {
             console.log(error);
             throw new common_1.InternalServerErrorException(error);
         }
-        return result;
+        return response(statusCode, message, resTree);
     }
     async allgoaladmin(user) {
         console.log(user);
@@ -323,8 +329,7 @@ let GoalsService = class GoalsService {
             console.log(error);
             throw new common_1.InternalServerErrorException(error);
         }
-        let result = { "statusCode": statusCode, "message": message, "data": resTree };
-        return result;
+        return response(statusCode, message, resTree);
     }
     async goalbyparentRec(user, id_goals) {
         let allGoal = null;
@@ -371,8 +376,7 @@ let GoalsService = class GoalsService {
         catch (error) {
             throw new common_1.InternalServerErrorException(error);
         }
-        let result = { "statusCode": statusCode, "message": message, "data": allGoal };
-        return result;
+        return response(statusCode, message, allGoal);
     }
     async goalbyparent(user, id_goals) {
         let statusCode = 999;
@@ -400,8 +404,7 @@ let GoalsService = class GoalsService {
         catch (error) {
             throw new common_1.InternalServerErrorException(error);
         }
-        let result = { "statusCode": statusCode, "message": message, "data": allGoal };
-        return result;
+        return response(statusCode, message, allGoal);
     }
     async addgoal(user, dto) {
         let statusCode = 999;
@@ -464,8 +467,7 @@ let GoalsService = class GoalsService {
         catch (error) {
             throw new common_1.InternalServerErrorException(error);
         }
-        let result = { "statusCode": statusCode, "message": message, "data": finalData };
-        return result;
+        return response(statusCode, message, finalData);
     }
     async editgoal(user, dto) {
         let statusCode = 999;
@@ -489,8 +491,7 @@ let GoalsService = class GoalsService {
             console.log(error);
             throw new common_1.InternalServerErrorException(error);
         }
-        let result = { "statusCode": statusCode, "message": message, "data": editGoal };
-        return result;
+        return response(statusCode, message, editGoal);
     }
     async remapgoal(user, dto) {
         let statusCode = 999;
@@ -525,8 +526,7 @@ let GoalsService = class GoalsService {
             console.log(error);
             throw new common_1.InternalServerErrorException(error);
         }
-        let result = { "statusCode": statusCode, "message": message, "data": editGoal };
-        return result;
+        return response(statusCode, message, editGoal);
     }
     async delgoal(user, id_goals) {
         let statusCode = 999;
@@ -554,8 +554,7 @@ let GoalsService = class GoalsService {
         catch (error) {
             throw new common_1.InternalServerErrorException(error);
         }
-        let result = { "statusCode": statusCode, "message": message, "data": delGoal };
-        return delGoal;
+        return response(statusCode, message, delGoal);
     }
     async initialGoals(user) {
         const tbl_goals = await this.prisma.tbl_goals.findMany({
@@ -566,15 +565,10 @@ let GoalsService = class GoalsService {
         if (!tbl_goals || tbl_goals.length <= 0) {
             throw new common_1.NotFoundException("Data Tidak ditemukan");
         }
-        const result = {
-            statusCode: 200,
-            message: "Berhasil mengambil data.",
-            data: tbl_goals
-        };
-        return result;
+        return response(0, "Berhasil ambil data", tbl_goals);
     }
     async childGoals(user, parent_goals) {
-        const tbl_goals = await this.prisma.tbl_goals.findMany({
+        const tbl_goals = await this.goalRepo.getGoals({
             where: {
                 parent_goals: parent_goals
             }
@@ -585,26 +579,25 @@ let GoalsService = class GoalsService {
         else {
             let currentData = convertToGoalsArray(tbl_goals);
             for (const iterator of tbl_goals) {
-                const child = await this.subchildGoals(iterator.id_goals);
+                var child = await this.subchildGoals(iterator.id_goals);
+                for (const iterator of child) {
+                    iterator.kodefikasi = 'GOAL-' + iterator.parent_goals + '-' + iterator.id_goals;
+                }
                 currentData[iterator.id_goals]["children"] = child;
             }
             var filtered = currentData.filter((el) => {
                 return el != null;
             });
-            const response = {
-                statusCode: 200,
-                message: "Berhasil mengambil data",
-                data: filtered
-            };
-            return response;
+            return response(0, "Berhasil ambil data", filtered);
         }
     }
     async subchildGoals(parent_goals) {
-        const tbl_goals = await this.prisma.tbl_goals.findMany({
+        const filter = {
             where: {
                 parent_goals: parent_goals
             }
-        });
+        };
+        const tbl_goals = await this.goalRepo.getGoals(filter);
         return tbl_goals;
     }
     async treeGoal(user, parent_goals) {
@@ -621,12 +614,27 @@ let GoalsService = class GoalsService {
             throw new common_1.NotFoundException("Data Tidak ditemukan");
         }
         let final = recurseBuildTree(tbl_goals, 0);
-        const result = {
-            statusCode: 0,
-            message: "Berhasil mengambil data",
-            data: final
+        return response(0, "Berhasil ambil data", final);
+    }
+    async searchGoal(user, searchTerm) {
+        if (searchTerm == null || searchTerm.trim().length < 8) {
+            throw new common_1.BadRequestException("Parameter pencarian kosong / kurang dari 8 karakter.");
+        }
+        const filter = {
+            take: 5,
+            where: {
+                status_goals: 1,
+                title_goals: {
+                    contains: searchTerm
+                }
+            }
         };
-        return result;
+        var searchRes = await this.goalRepo.getGoals(filter);
+        if (searchRes.length <= 0) {
+            throw new common_1.NotFoundException("Data tidak ditemukan");
+        }
+        const result = convertToGoalsArray(searchRes);
+        return response(0, "Berhasil ambil data", result.filter((el) => { return el != null; }));
     }
 };
 GoalsService = __decorate([
