@@ -55,11 +55,14 @@ model tbl_goals {
   status_goals       Int?
   progress           Int?
   parent_goals       Int?
-  type_goals         Json?   
+  type_goals         String?   @db.VarChar(250)
   last_modified_date DateTime? @default(now()) @db.DateTime(0)
-  indikator          Json?   
+  indikator          String?   @db.LongText
+  id_area            Int?
+  id_cluster         Int?
+  kodefikasi         String?   @db.VarChar(255)
   parent_family      Int?
-  kodefikasi         String?   @db.Text
+
   @@map("goals")
 }
 
@@ -82,4 +85,21 @@ model tbl_cluster {
   id_sub_areas String?   @db.LongText
 
   @@map("cluster")
+}
+
+model goals_bonar {
+  id_goals           Int       @id @default(autoincrement())
+  title_goals        String?   @db.VarChar(150)
+  desc_goals         String?   @db.VarChar(500)
+  pic_goals          String?   @db.VarChar(150)
+  start_date         DateTime? @db.DateTime(0)
+  due_date           DateTime? @db.DateTime(0)
+  status_goals       Int?
+  progress           Int?
+  parent_goals       Int?
+  type_goals         String?   @db.LongText
+  last_modified_date DateTime? @default(now()) @db.DateTime(0)
+  indikator          String?   @db.LongText
+  kodefikasi         String?   @db.Text
+  parent_family      Int?
 }
