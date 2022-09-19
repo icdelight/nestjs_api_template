@@ -599,7 +599,7 @@ export class GoalsService {
         {
             throw new NotFoundException("Data Tidak ditemukan");
         }
-        return response(0,"Berhasil ambil data",tbl_goals);
+        return response(200,"Berhasil ambil data",tbl_goals);
     }
 
     async childGoals(user: tbl_users, parent_goals) {
@@ -625,7 +625,7 @@ export class GoalsService {
                 return el != null;
             })
 
-            return response(0,"Berhasil ambil data",filtered);
+            return response(200,"Berhasil ambil data",filtered);
         }
     }
 
@@ -658,7 +658,7 @@ export class GoalsService {
             throw new NotFoundException("Data Tidak ditemukan");
         }
         let final = recurseBuildTree(tbl_goals, 0);
-        return response(0,"Berhasil ambil data", final);
+        return response(200,"Berhasil ambil data", final);
     }
 
     async searchGoal(user: tbl_users, searchTerm) {
@@ -680,6 +680,6 @@ export class GoalsService {
             throw new NotFoundException("Data tidak ditemukan");
         }
         const result = convertToGoalsArray(searchRes);
-        return response(0,"Berhasil ambil data",result.filter((el) => { return el != null}));
+        return response(200,"Berhasil ambil data",result.filter((el) => { return el != null}));
     }
 }
