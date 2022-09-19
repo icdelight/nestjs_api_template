@@ -68,7 +68,7 @@ export class GoalsController {
 
     @HttpCode(HttpStatus.OK)
     @Post('treegoals')
-    treeGoals(@GetUser() user: tbl_users,  @Body('parent_goals', ParseIntPipe) dto: any) {
+    treeGoals(@GetUser() user: tbl_users,  @Body('parent_family', ParseIntPipe) dto: any) {
         return this.goalService.treeGoal(user,dto);
     }
 
