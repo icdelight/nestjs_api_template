@@ -12,18 +12,22 @@ export declare class GoalsController {
     initialGoals(user: tbl_users): Promise<{
         statusCode: number;
         message: string;
-        data: import(".prisma/client").tbl_goals[];
+        data: any;
     }>;
     childGoals(user: tbl_users, parent_goals: number): Promise<{
         statusCode: number;
         message: string;
-        data: any[];
+        data: any;
     }>;
-    alltreeGoals(user: tbl_users): Promise<any>;
+    alltreeGoals(user: tbl_users): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     allGoalsAdmin(user: tbl_users): Promise<{
         statusCode: number;
         message: string;
-        data: any[];
+        data: any;
     }>;
     addGoals(user: tbl_users, dto: AddGoalsDto): Promise<{
         statusCode: number;
@@ -42,6 +46,11 @@ export declare class GoalsController {
     treeGoals(user: tbl_users, dto: any): Promise<{
         statusCode: number;
         message: string;
-        data: any[];
+        data: any;
+    }>;
+    searchGoal(user: tbl_users, searchTerm: string): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
     }>;
 }
