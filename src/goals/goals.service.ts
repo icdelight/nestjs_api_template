@@ -136,6 +136,7 @@ function convertToGoalsArray(tbl_goals, kodefikasi = 'GOAL')
         finalData[stringID]["id_goals"] = element.id_goals? element.id_goals : null;
         finalData[stringID]["title_goals"] = element.title_goals? element.title_goals : null;
         finalData[stringID]["desc_goals"] = element.desc_goals ? element.desc_goals : null
+        finalData[stringID]["parent_family"] = element.parent_family ? element.parent_family : null
         finalData[stringID]["title"] = element.title_goals? element.title_goals : null;
         finalData[stringID]["subtitle"] = element.desc_goals? element.desc_goals: null
         finalData[stringID]["pic_goals"] = element.pic_goals? element.pic_goals : null
