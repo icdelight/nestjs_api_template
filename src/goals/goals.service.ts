@@ -53,9 +53,9 @@ function recurseTree(allGoal,parent) {
                     parentGoal[key]["status_goals"] = obj['status_goals'];
                     parentGoal[key]["progress"] = obj['progress'];
                     parentGoal[key]["parent_goals"] = obj['parent_goals'];
-                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ?(obj['type_goals']):style_col;
+                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ?JSON.parse(obj['type_goals']):style_col;
                     parentGoal[key]["last_modified_date"] = obj['firstName'];
-                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?(obj['indikator']):indikator;
+                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?JSON.parse(obj['indikator']):indikator;
                 }
             });
 
@@ -104,10 +104,10 @@ function recurseTreeAdmin(allGoal,parent) {
                     parentGoal[key]["status_goals"] = obj['status_goals'];
                     parentGoal[key]["progress"] = obj['progress'];
                     parentGoal[key]["parent"] = obj['parent'];
-                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ?(obj['type_goals']):style_col;
+                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ?JSON.parse(obj['type_goals']):style_col;
                     parentGoal[key]["last_modified_date"] = obj['last_modified_date'];
                     parentGoal[key]["firstName"] = obj['name'];
-                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?(obj['indikator']):indikator;
+                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?JSON.parse(obj['indikator']):indikator;
                 }
             });
 
