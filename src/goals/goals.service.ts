@@ -135,7 +135,10 @@ function convertToGoalsArray(tbl_goals, kodefikasi = 'GOAL')
         finalData[stringID] = {};
         finalData[stringID]["id_goals"] = element.id_goals? element.id_goals : null;
         finalData[stringID]["title_goals"] = element.title_goals? element.title_goals : null;
-        finalData[stringID]["desc_goals"] = element.desc_goals? element.desc_goals: null
+        finalData[stringID]["desc_goals"] = element.desc_goals ? element.desc_goals : null
+        finalData[stringID]["parent_family"] = element.parent_family ? element.parent_family : null
+        finalData[stringID]["title"] = element.title_goals? element.title_goals : null;
+        finalData[stringID]["subtitle"] = element.desc_goals? element.desc_goals: null
         finalData[stringID]["pic_goals"] = element.pic_goals? element.pic_goals : null
         finalData[stringID]["start_date"] = element.start_date? element.start_date : null
         finalData[stringID]["due_date"] = element.due_date? element.due_date : null
@@ -166,6 +169,8 @@ function recurseBuildTree(goals, parent, kodefikasi = 'GOAL')
         final[(element.id_goals)]['id_goals'] = element.id_goals;
         final[(element.id_goals)]['parent_goals'] = element.parent_goals;
         final[(element.id_goals)]['parent_family'] = element.parent_family;
+        final[(element.id_goals)]['title'] = element.title_goals;
+        final[(element.id_goals)]['subtitle'] = element.desc_goals;
         final[(element.id_goals)]['title_goals'] = element.title_goals;
         final[(element.id_goals)]['desc_goals'] = element.desc_goals;
         final[(element.id_goals)]['pic_goals'] = element.pic_goals;
@@ -639,7 +644,7 @@ export class GoalsService {
         const tbl_goals = await this.goalRepo.getGoals(filter);
         return tbl_goals;
     }
-    async  treeGoal(user : tbl_users, parent_goals) {
+    async  treeGoal(user : tbl_users, parent_family) {
         const param = {
             // select : {
             //     id_goals: true,
@@ -647,7 +652,7 @@ export class GoalsService {
             //     parent_family: true
             // },
             where : {
-                parent_family : parent_goals
+                parent_family : parent_family
             },
             orderBy : {
                 parent_goals : 'asc'

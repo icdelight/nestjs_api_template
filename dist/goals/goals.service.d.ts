@@ -65,7 +65,7 @@ export declare class GoalsService {
         data: any;
     }>;
     subchildGoals(parent_goals: any): Promise<tbl_goals[] | []>;
-    treeGoal(user: tbl_users, parent_goals: any): Promise<{
+    treeGoal(user: tbl_users, parent_family: any): Promise<{
         statusCode: number;
         message: string;
         data: any;
