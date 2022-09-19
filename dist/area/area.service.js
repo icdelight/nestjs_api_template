@@ -76,15 +76,51 @@ let AreaServices = class AreaServices {
             console.log(user.role);
             if (dto.id_area != undefined && user.role == '1') {
                 topArea = await this.prisma.$queryRaw `SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_area = ${dto.id_area} AND a.id_sub_area != ${dto.id_sub_area} order by a.id_area asc, a.id_parent_area asc;`;
-                console.log(`SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_area = ${dto.id_area} order by a.id_area asc, a.id_parent_area asc;`);
             }
             else if (user.role == '2') {
                 topArea = await this.prisma.$queryRaw `SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_area = ${user.id_area} AND a.id_sub_area != ${dto.id_sub_area} order by a.id_area asc, a.id_parent_area asc;`;
-                console.log(`SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_area = ${user.id_area} order by a.id_area asc, a.id_parent_area asc;`);
             }
             else {
                 topArea = await this.prisma.$queryRaw `SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area order by a.id_area asc, a.id_parent_area asc;`;
-                console.log(`SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area order by a.id_area asc, a.id_parent_area asc;`);
+            }
+            if (topArea) {
+                statusCode = 200;
+                message = "Success inquiry area";
+                data = topArea;
+            }
+            else {
+                statusCode = 0;
+                message = "Failed inquiry area";
+            }
+        }
+        catch (error) {
+            console.log(error);
+            throw new common_1.InternalServerErrorException(error);
+        }
+        let result = { "statusCode": statusCode, "message": message, "data": data };
+        return result;
+    }
+    async getAllParentArea(user, dto) {
+        let statusCode = 999;
+        let message = "Something went wrong.";
+        let data = null;
+        if (user.role != "1" && user.role != "2") {
+            throw new common_1.ForbiddenException('You dont have privileges.');
+        }
+        if (user.role != '1' && dto.id_area != undefined && user.id_area != dto.id_area) {
+            throw new common_1.ForbiddenException('You dont have privileges.');
+        }
+        let topArea = [];
+        try {
+            console.log(user.role);
+            if (dto.id_area != undefined && user.role == '1') {
+                topArea = await this.prisma.$queryRaw `SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_parent_area in ('0','1') order by a.id_area asc, a.id_parent_area asc;`;
+            }
+            else if (user.role == '2') {
+                topArea = await this.prisma.$queryRaw `SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_area = ${user.id_area} AND a.id_sub_area = ${dto.id_area} order by a.id_area asc, a.id_parent_area asc;`;
+            }
+            else {
+                topArea = await this.prisma.$queryRaw `SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area order by a.id_area asc, a.id_parent_area asc;`;
             }
             if (topArea) {
                 statusCode = 200;
@@ -181,9 +217,7 @@ let AreaServices = class AreaServices {
             }
             else {
                 topArea = await this.prisma.$queryRaw `SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE (a.desc_area like ${filter} OR a.desc_sub_area like ${filter}) order by a.id_area asc, a.id_parent_area asc limit ${offset},${limit};`;
-                console.log(`SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE (a.desc_area like ${filter} OR a.desc_sub_area like ${filter}) order by a.id_area asc, a.id_parent_area asc limit ${offset},${limit};`);
             }
-            console.log(topArea);
             if (topArea) {
                 if (topArea.length > 0) {
                     statusCode = 200;

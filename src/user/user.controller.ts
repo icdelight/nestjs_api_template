@@ -27,6 +27,16 @@ export class UserController {
         return this.userService.getAllUsers(user,dto);
     }
 
+    @Post('alluserspage')
+    getAllUserByPage(@GetUser() user: tbl_users, @Body() dto: any) {
+        return this.userService.getAllUsersByPage(user,dto);
+    }
+
+    @Post('finduserspage')
+    findUserByName(@GetUser() user: tbl_users, @Body() dto: any) {
+        return this.userService.getAllUsersByName(user,dto);
+    }
+
     @Get('allmenus')
     getAllMenu(@GetUser() user: tbl_users, @Body() dto: any) {
         return this.userService.getAllMenu(user,dto);
@@ -34,7 +44,7 @@ export class UserController {
 
     @HttpCode(HttpStatus.OK)
     @Post('manageuser')
-    manageuser(@GetUser() user: tbl_users, @Body() dto: UserDetDto) {
+    manageuser(@GetUser() user: tbl_users, @Body() dto: any) {
         return this.userService.manageuser(user,dto);
     }
     

@@ -25,6 +25,9 @@ let AreaController = class AreaController {
     getAllArea(user, dto) {
         return this.areaService.getAllArea(user, dto);
     }
+    getAllParentArea(user, dto) {
+        return this.areaService.getAllParentArea(user, dto);
+    }
     getAllAreaPage(user, dto) {
         return this.areaService.getAllAreaByPage(user, dto);
     }
@@ -34,7 +37,7 @@ let AreaController = class AreaController {
     getAllAreatTree(user, dto) {
         return this.areaService.getAllAreaTree(user, dto);
     }
-    getAllParentArea(user, dto) {
+    getAllParentsArea(user, dto) {
         return this.areaService.getParentArea(user, dto);
     }
     addArea(user, dto) {
@@ -52,6 +55,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], AreaController.prototype, "getAllArea", null);
+__decorate([
+    (0, common_1.Post)('allparentarea'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], AreaController.prototype, "getAllParentArea", null);
 __decorate([
     (0, common_1.Post)('allareapage'),
     __param(0, (0, decorator_1.GetUser)()),
@@ -77,13 +88,13 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AreaController.prototype, "getAllAreatTree", null);
 __decorate([
-    (0, common_1.Post)('allparentarea'),
+    (0, common_1.Post)('allareaparent'),
     __param(0, (0, decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
-], AreaController.prototype, "getAllParentArea", null);
+], AreaController.prototype, "getAllParentsArea", null);
 __decorate([
     (0, common_1.Post)('addarea'),
     __param(0, (0, decorator_1.GetUser)()),

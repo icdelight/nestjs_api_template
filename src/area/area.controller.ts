@@ -15,6 +15,11 @@ export class AreaController {
     getAllArea(@GetUser() user: tbl_users, @Body() dto: any) {
         return this.areaService.getAllArea(user,dto);
     }
+    
+    @Post('allparentarea')
+    getAllParentArea(@GetUser() user: tbl_users, @Body() dto: any) {
+        return this.areaService.getAllParentArea(user,dto);
+    }
 
     @Post('allareapage')
     getAllAreaPage(@GetUser() user: tbl_users, @Body() dto: any) {
@@ -31,8 +36,8 @@ export class AreaController {
         return this.areaService.getAllAreaTree(user,dto);
     }
 
-    @Post('allparentarea')
-    getAllParentArea(@GetUser() user: tbl_users, @Body() dto: any) {
+    @Post('allareaparent')
+    getAllParentsArea(@GetUser() user: tbl_users, @Body() dto: any) {
         return this.areaService.getParentArea(user,dto);
     }
 

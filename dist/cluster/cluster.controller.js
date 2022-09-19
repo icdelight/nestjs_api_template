@@ -12,94 +12,75 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserController = void 0;
+exports.ClusterController = void 0;
 const common_1 = require("@nestjs/common");
-const user_service_1 = require("./user.service");
-const decorator_1 = require("../auth/decorator");
 const guard_1 = require("../auth/guard");
-let UserController = class UserController {
-    constructor(userService) {
-        this.userService = userService;
+const cluster_service_1 = require("./cluster.service");
+const decorator_1 = require("../auth/decorator");
+let ClusterController = class ClusterController {
+    constructor(clusterService) {
+        this.clusterService = clusterService;
     }
-    getMe(user) {
-        return user;
+    GetAllCluster(user, dto) {
+        return this.clusterService.getAllCluster(user, dto);
     }
-    editUser() {
+    GetAllClusterByPage(user, dto) {
+        return this.clusterService.getAllClusterByPage(user, dto);
     }
-    getAllUser(user, dto) {
-        return this.userService.getAllUsers(user, dto);
+    FindClusterByPage(user, dto) {
+        return this.clusterService.getAllClusterByName(user, dto);
     }
-    getAllUserByPage(user, dto) {
-        return this.userService.getAllUsersByPage(user, dto);
+    AddCluster(user, dto) {
+        return this.clusterService.addCluster(user, dto);
     }
-    findUserByName(user, dto) {
-        return this.userService.getAllUsersByName(user, dto);
-    }
-    getAllMenu(user, dto) {
-        return this.userService.getAllMenu(user, dto);
-    }
-    manageuser(user, dto) {
-        return this.userService.manageuser(user, dto);
+    EditCluster(user, dto) {
+        return this.clusterService.editCluster(user, dto);
     }
 };
 __decorate([
-    (0, common_1.Get)('whome'),
-    __param(0, (0, decorator_1.GetUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], UserController.prototype, "getMe", null);
-__decorate([
-    (0, common_1.Patch)(),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], UserController.prototype, "editUser", null);
-__decorate([
-    (0, common_1.Post)('allusers'),
+    (0, common_1.Post)('allcluster'),
     __param(0, (0, decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
-], UserController.prototype, "getAllUser", null);
+], ClusterController.prototype, "GetAllCluster", null);
 __decorate([
-    (0, common_1.Post)('alluserspage'),
+    (0, common_1.Post)('allclusterpage'),
     __param(0, (0, decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
-], UserController.prototype, "getAllUserByPage", null);
+], ClusterController.prototype, "GetAllClusterByPage", null);
 __decorate([
-    (0, common_1.Post)('finduserspage'),
+    (0, common_1.Post)('findclusterpage'),
     __param(0, (0, decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
-], UserController.prototype, "findUserByName", null);
+], ClusterController.prototype, "FindClusterByPage", null);
 __decorate([
-    (0, common_1.Get)('allmenus'),
+    (0, common_1.Post)('addcluster'),
     __param(0, (0, decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
-], UserController.prototype, "getAllMenu", null);
+], ClusterController.prototype, "AddCluster", null);
 __decorate([
-    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    (0, common_1.Post)('manageuser'),
+    (0, common_1.Post)('editcluster'),
     __param(0, (0, decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
-], UserController.prototype, "manageuser", null);
-UserController = __decorate([
+], ClusterController.prototype, "EditCluster", null);
+ClusterController = __decorate([
     (0, common_1.UseGuards)(guard_1.JwtGuard),
-    (0, common_1.Controller)('users'),
-    __metadata("design:paramtypes", [user_service_1.UserServices])
-], UserController);
-exports.UserController = UserController;
-//# sourceMappingURL=user.controller.js.map
+    (0, common_1.Controller)('cluster'),
+    __metadata("design:paramtypes", [cluster_service_1.ClusterServices])
+], ClusterController);
+exports.ClusterController = ClusterController;
+//# sourceMappingURL=cluster.controller.js.map

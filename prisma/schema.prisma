@@ -13,7 +13,7 @@ model tbl_users {
   pass        String?  @db.VarChar(500)
   flag_active Boolean?
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @default(now()) @updatedAt
   firstName   String?
   lastName    String?
   apps        String?  @db.VarChar(20)
@@ -71,12 +71,14 @@ model mst_area {
   active         Int?
 }
 
-model cluster {
+model tbl_cluster {
   id_cluster   Int       @id @default(autoincrement())
   nama_cluster String?   @db.VarChar(255)
   id_area      Int?
-  id_sub_area  Int?
   flag_active  Int?
   createdAt    DateTime? @db.DateTime(0)
-  modifiedAt   DateTime? @db.DateTime(0)
+  modifiedAt   DateTime? @default(now()) @db.DateTime(0)
+  id_sub_areas String?   @db.LongText
+
+  @@map("cluster")
 }
