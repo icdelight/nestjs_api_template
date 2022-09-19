@@ -30,6 +30,14 @@ __decorate([
     __metadata("design:type", String)
 ], AddGoalsDto.prototype, "pic_goals", void 0);
 __decorate([
+    (0, class_validator_1.IsJSON)(),
+    __metadata("design:type", Object)
+], AddGoalsDto.prototype, "type_goals", void 0);
+__decorate([
+    (0, class_validator_1.IsJSON)(),
+    __metadata("design:type", Object)
+], AddGoalsDto.prototype, "indikator", void 0);
+__decorate([
     (0, class_validator_1.IsDate)(),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_transformer_1.Type)(() => Date),

@@ -453,8 +453,8 @@ export class GoalsService {
                     status_goals: Number("1"),
                     progress: Number("0"),
                     parent_goals: Number.isInteger(dto.parent_goals)?dto.parent_goals:Number(dto.parent_goals),
-                    type_goals: dto.type_goals,
-                    indikator: dto.indikator,
+                    type_goals: JSON.parse(dto.type_goals),
+                    indikator: JSON.parse(dto.indikator),
                 }
             );
             finalData = addGoal;
@@ -599,7 +599,8 @@ export class GoalsService {
         {
             throw new NotFoundException("Data Tidak ditemukan");
         }
-        return response(200,"Berhasil ambil data",tbl_goals);
+        let finalResult = convertToGoalsArray(tbl_goals);
+        return response(200,"Berhasil ambil data",finalResult.filter((el) => {return el != null}));
     }
 
     async childGoals(user: tbl_users, parent_goals) {

@@ -424,8 +424,8 @@ let GoalsService = class GoalsService {
                 status_goals: Number("1"),
                 progress: Number("0"),
                 parent_goals: Number.isInteger(dto.parent_goals) ? dto.parent_goals : Number(dto.parent_goals),
-                type_goals: dto.type_goals,
-                indikator: dto.indikator,
+                type_goals: JSON.parse(dto.type_goals),
+                indikator: JSON.parse(dto.indikator),
             });
             finalData = addGoal;
             if (addGoal) {
@@ -565,7 +565,8 @@ let GoalsService = class GoalsService {
         if (!tbl_goals || tbl_goals.length <= 0) {
             throw new common_1.NotFoundException("Data Tidak ditemukan");
         }
-        return response(0, "Berhasil ambil data", tbl_goals);
+        let finalResult = convertToGoalsArray(tbl_goals);
+        return response(200, "Berhasil ambil data", finalResult.filter((el) => { return el != null; }));
     }
     async childGoals(user, parent_goals) {
         const tbl_goals = await this.goalRepo.getGoals({
@@ -588,7 +589,7 @@ let GoalsService = class GoalsService {
             var filtered = currentData.filter((el) => {
                 return el != null;
             });
-            return response(0, "Berhasil ambil data", filtered);
+            return response(200, "Berhasil ambil data", filtered);
         }
     }
     async subchildGoals(parent_goals) {
@@ -614,7 +615,7 @@ let GoalsService = class GoalsService {
             throw new common_1.NotFoundException("Data Tidak ditemukan");
         }
         let final = recurseBuildTree(tbl_goals, 0);
-        return response(0, "Berhasil ambil data", final);
+        return response(200, "Berhasil ambil data", final);
     }
     async searchGoal(user, searchTerm) {
         if (searchTerm == null || searchTerm.trim().length < 8) {
@@ -634,7 +635,7 @@ let GoalsService = class GoalsService {
             throw new common_1.NotFoundException("Data tidak ditemukan");
         }
         const result = convertToGoalsArray(searchRes);
-        return response(0, "Berhasil ambil data", result.filter((el) => { return el != null; }));
+        return response(200, "Berhasil ambil data", result.filter((el) => { return el != null; }));
     }
 };
 GoalsService = __decorate([
