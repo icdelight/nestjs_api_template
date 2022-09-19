@@ -44,7 +44,8 @@ export class GoalsController {
 
     @HttpCode(HttpStatus.OK)
     @Post('addgoals')
-    addGoals(@GetUser() user: tbl_users,  @Body() dto : AddGoalsDto) {
+    addGoals(@GetUser() user: tbl_users, @Body() dto: AddGoalsDto) {
+        // console.log('DTO', dto); return false;
         return this.goalService.addgoal(user,dto);
     }
 

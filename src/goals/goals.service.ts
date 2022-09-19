@@ -53,9 +53,9 @@ function recurseTree(allGoal,parent) {
                     parentGoal[key]["status_goals"] = obj['status_goals'];
                     parentGoal[key]["progress"] = obj['progress'];
                     parentGoal[key]["parent_goals"] = obj['parent_goals'];
-                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ?JSON.parse(obj['type_goals']):style_col;
+                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ?(obj['type_goals']):style_col;
                     parentGoal[key]["last_modified_date"] = obj['firstName'];
-                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?JSON.parse(obj['indikator']):indikator;
+                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?(obj['indikator']):indikator;
                 }
             });
 
@@ -104,10 +104,10 @@ function recurseTreeAdmin(allGoal,parent) {
                     parentGoal[key]["status_goals"] = obj['status_goals'];
                     parentGoal[key]["progress"] = obj['progress'];
                     parentGoal[key]["parent"] = obj['parent'];
-                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ?JSON.parse(obj['type_goals']):style_col;
+                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ? (obj['type_goals']):style_col;
                     parentGoal[key]["last_modified_date"] = obj['last_modified_date'];
                     parentGoal[key]["firstName"] = obj['name'];
-                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?JSON.parse(obj['indikator']):indikator;
+                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ? (obj['indikator']):indikator;
                 }
             });
 
@@ -453,8 +453,8 @@ export class GoalsService {
                     status_goals: Number("1"),
                     progress: Number("0"),
                     parent_goals: Number.isInteger(dto.parent_goals)?dto.parent_goals:Number(dto.parent_goals),
-                    type_goals: dto.type_goals,
-                    indikator: dto.indikator,
+                    type_goals: JSON.parse(dto.type_goals),
+                    indikator: JSON.parse(dto.indikator),
                 }
             );
             finalData = addGoal;
@@ -599,7 +599,8 @@ export class GoalsService {
         {
             throw new NotFoundException("Data Tidak ditemukan");
         }
-        return response(200,"Berhasil ambil data",tbl_goals);
+        let finalResult = convertToGoalsArray(tbl_goals);
+        return response(200,"Berhasil ambil data",finalResult.filter((el) => {return el != null}));
     }
 
     async childGoals(user: tbl_users, parent_goals) {

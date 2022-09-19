@@ -15,10 +15,10 @@ export class AddGoalsDto {
     pic_goals: string;
 
     @IsJSON()
-    type_goals: string;
+    type_goals: JSON;
 
     @IsJSON()
-    indikator: string;
+    indikator: JSON;
 
     @IsDate()
     @IsNotEmpty()
