@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, ForbiddenException, HttpException, Injectable, InternalServerErrorException } from "@nestjs/common";
+import { BadRequestException, ConflictException, ConsoleLogger, ForbiddenException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { GoalsDto } from "../auth/dto";
 import { AddGoalsDto } from "../auth/dto";
@@ -7,9 +7,19 @@ import * as argon from "argon2";
 import { empty, PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
-import { tbl_users } from '@prisma/client';
-import { isNull } from "util";
+import { tbl_goals, tbl_users } from '@prisma/client';
+import { sleep } from "pactum";
+import { GoalRepository } from "./goals.repository";
 
+function response(statusCode: number, message: string, data:any)
+{
+    const response = {
+        statusCode: statusCode,
+        message: message,
+        data: data
+    };
+    return response;
+}
 
 function recurseTree(allGoal,parent) {
     let obj = [];
@@ -43,9 +53,9 @@ function recurseTree(allGoal,parent) {
                     parentGoal[key]["status_goals"] = obj['status_goals'];
                     parentGoal[key]["progress"] = obj['progress'];
                     parentGoal[key]["parent_goals"] = obj['parent_goals'];
-                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ?JSON.parse(obj['type_goals']):style_col;
+                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ?(obj['type_goals']):style_col;
                     parentGoal[key]["last_modified_date"] = obj['firstName'];
-                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?JSON.parse(obj['indikator']):indikator;
+                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?(obj['indikator']):indikator;
                 }
             });
 
@@ -94,10 +104,10 @@ function recurseTreeAdmin(allGoal,parent) {
                     parentGoal[key]["status_goals"] = obj['status_goals'];
                     parentGoal[key]["progress"] = obj['progress'];
                     parentGoal[key]["parent"] = obj['parent'];
-                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ?JSON.parse(obj['type_goals']):style_col;
+                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ?(obj['type_goals']):style_col;
                     parentGoal[key]["last_modified_date"] = obj['last_modified_date'];
                     parentGoal[key]["firstName"] = obj['name'];
-                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?JSON.parse(obj['indikator']):indikator;
+                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?(obj['indikator']):indikator;
                 }
             });
 
@@ -115,9 +125,67 @@ function recurseTreeAdmin(allGoal,parent) {
     return resTree;
 }
 
+function convertToGoalsArray(tbl_goals, kodefikasi = 'GOAL')
+{
+    let resData = [];
+    let i = 1;
+    let finalData = {};
+    tbl_goals.forEach(function(element) {
+        var stringID = `${element.id_goals}`;
+        finalData[stringID] = {};
+        finalData[stringID]["id_goals"] = element.id_goals? element.id_goals : null;
+        finalData[stringID]["title_goals"] = element.title_goals? element.title_goals : null;
+        finalData[stringID]["desc_goals"] = element.desc_goals? element.desc_goals: null
+        finalData[stringID]["pic_goals"] = element.pic_goals? element.pic_goals : null
+        finalData[stringID]["start_date"] = element.start_date? element.start_date : null
+        finalData[stringID]["due_date"] = element.due_date? element.due_date : null
+        finalData[stringID]["status_goals"] = element.status_goals? element.status_goals : null
+        finalData[stringID]["progress"] = element.progress? element.progress : null
+        finalData[stringID]["parent_goals"] = element.parent_goals? element.parent_goals : null
+        finalData[stringID]["type_goals"] = element.type_goals? element.type_goals : null
+        finalData[stringID]["indikator"] = element.indikator? element.indikator : null
+        finalData[stringID]["kodefikasi"] = kodefikasi+ '-' + element.id_goals
+        finalData[stringID]["children"] = []
+        resData[stringID] = finalData[stringID]
+        finalData = {}
+    });
+    
+    return resData;
+}
+
+function recurseBuildTree(goals, parent, kodefikasi = 'GOAL')
+{
+    let final = [];
+    let filterGoals = goals.filter( (element, idx, array) => {
+        return element.parent_goals == parent;
+    })
+    let nextParent = null
+    filterGoals.forEach((element,index,array) => {
+        nextParent = element.id_goals;
+        final[(element.id_goals)] = {}
+        final[(element.id_goals)]['id_goals'] = element.id_goals;
+        final[(element.id_goals)]['parent_goals'] = element.parent_goals;
+        final[(element.id_goals)]['parent_family'] = element.parent_family;
+        final[(element.id_goals)]['title_goals'] = element.title_goals;
+        final[(element.id_goals)]['desc_goals'] = element.desc_goals;
+        final[(element.id_goals)]['pic_goals'] = element.pic_goals;
+        final[(element.id_goals)]['start_date'] = element.start_date;
+        final[(element.id_goals)]['due_date'] = element.due_date;
+        final[(element.id_goals)]['status_goals'] = element.status_goals;
+        final[(element.id_goals)]['indikator'] = element.indikator;
+        final[(element.id_goals)]['type_goals'] = element.type_goals;
+        final[(element.id_goals)]['kodefikasi'] = kodefikasi+ '-' + element.id_goals.toString();
+        final[(element.id_goals)]['children'] = recurseBuildTree(goals,nextParent, kodefikasi+ '-' + element.id_goals.toString());
+    });
+
+    var filteredFinal = final.filter((el) => {
+        return el != null;
+    })
+    return filteredFinal;
+}
 @Injectable()
 export class GoalsService {
-    constructor(private config: ConfigService, private prisma: PrismaService, private jwt: JwtService) {}
+    constructor(private goalRepo: GoalRepository, private config: ConfigService, private prisma: PrismaService, private jwt: JwtService) {}
     
     async allgoal(user: tbl_users) {
         let statusCode = 999;
@@ -171,14 +239,13 @@ export class GoalsService {
         }catch(error) {
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":allGoal};
-        return result;
+        return response(statusCode,message,allGoal);
     }
 
     async alltreegoal(user: tbl_users) {
         let statusCode = 999;
         let message = "Something went wrong.";
-        let data = null;let result = null;
+        let data = null;
         if(user.role != "1" && user.role != "2" ) {
             throw new ForbiddenException('You dont have privileges.');
         }
@@ -206,18 +273,16 @@ export class GoalsService {
                 }
             });
             let parent_id = 0;
-            
             if(topGoal && topGoal.length > 0) {
                 topGoal.forEach(element => {
                     if(element !== null) {
-                        if(element.parent_goals != parent_id || parent_id == 0) {
-                            allGoal[element.parent_goals] = {};
+                        if(!allGoal.hasOwnProperty(element.parent_goals)){
+                            allGoal[element.parent_goals] = {}
                         }
                         allGoal[element.parent_goals][element.id_goals] = element;
                         parent_id = element.parent_goals;
                     }
                 });
-                // console.log();
                 let obj = [];
                 parent_id = 0;
                 let parentGoal = {};
@@ -235,15 +300,15 @@ export class GoalsService {
                 message = "Failed Inquiry Goals, Empty goals.";
                 resTree[0] = [];
             }
-            result = {"statusCode":statusCode,"message":message,"data":resTree[0]};
         }catch(error) {
             console.log(error);
             throw new InternalServerErrorException(error);
         }
-        return result;
+        return response(statusCode,message,resTree);
     }
 
     async allgoaladmin(user: tbl_users) {
+        console.log(user)
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
@@ -266,8 +331,8 @@ export class GoalsService {
             if(topGoal && topGoal.length != 0) {
                 topGoal.forEach(element => {
                     if(element !== null) {
-                        if(element.parent != parent_id || parent_id == 0) {
-                            allGoal[element.parent] = {};
+                        if(!allGoal.hasOwnProperty(element.parent)){
+                            allGoal[element.parent] = {}
                         }
                         allGoal[element.parent][element.id] = element;
                         parent_id = element.parent;
@@ -295,8 +360,7 @@ export class GoalsService {
             console.log(error)
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":resTree};
-        return result;
+        return response(statusCode,message,resTree);
     }
 
     async goalbyparentRec(user: tbl_users, id_goals: number) {
@@ -341,8 +405,7 @@ export class GoalsService {
         }catch(error) {
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":allGoal};
-        return result;
+        return response(statusCode,message,allGoal);
     }
 
     async goalbyparent(user: tbl_users, id_goals: number) {
@@ -369,8 +432,7 @@ export class GoalsService {
         }catch(error) {
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":allGoal};
-        return result;
+        return response(statusCode,message,allGoal);
     }
 
     async goalbyname(user: tbl_users, dto: any) {
@@ -429,10 +491,10 @@ export class GoalsService {
         if(user.role != "1") {
             throw new ForbiddenException('You dont have privileges.');
         }
-        let addGoal = null;
+        var finalData = null;
         try {
-            addGoal = await this.prisma.tbl_goals.create({
-                data: {
+            const addGoal = await this.goalRepo.createGoal(
+                {
                     title_goals: dto.title_goals,
                     desc_goals: dto.desc_goals,
                     pic_goals: dto.pic_goals,
@@ -444,46 +506,59 @@ export class GoalsService {
                     type_goals: dto.type_goals,
                     indikator: dto.indikator,
                 }
-            });
+            );
+            finalData = addGoal;
             if(addGoal) {
+                if(addGoal.parent_goals == 0){
+                    const updateKodefikasi = await this.goalRepo.updateKodefikasi(addGoal.id_goals, addGoal);
+                    finalData = updateKodefikasi;
+                    if(!updateKodefikasi)
+                    {
+                        await this.goalRepo.deleteGoal(addGoal.id_goals);
+                        const result = {
+                            statusCode : 0,
+                            message : "Failed Add Goal."
+                        }
+                        return result;
+                    }
+                }else{
+                    const parentCode = await this.goalRepo.getGoal(addGoal.parent_goals);
+                    if(parentCode)
+                    {
+                        const updateKodefikasi = await this.goalRepo.updateKodefikasi(addGoal.id_goals, parentCode);
+                        finalData = updateKodefikasi;
+                        if(!updateKodefikasi)
+                        {
+                            await this.goalRepo.deleteGoal(addGoal.id_goals);
+                            const result = {
+                                statusCode : 0,
+                                message : "Failed Add Goal."
+                            }
+                            return result;
+                        }
+                    }
+                }
                 statusCode = 200;
-                message = "Success Add Goals.";
+                message = "Success Add Goal.";
             }else{
                 statusCode = 0;
-                message = "Failed Add Goals.";
+                message = "Failed Add Goal.";
             }
         }catch(error) {
-            console.log(error);
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":addGoal};
-        return result;
+        return response(statusCode,message,finalData);
     }
 
     async editgoal(user: tbl_users, dto : any) {
         let statusCode = 999;
         let message = "Something went wrong.";
-        let data = null;
         if(user.role != "1") {
             throw new ForbiddenException('You dont have privileges.');
         }
         let editGoal = null;
         try {
-            editGoal = await this.prisma.tbl_goals.updateMany({
-                data: {
-                    title_goals: dto.title_goals,
-                    desc_goals: dto.desc_goals,
-                    pic_goals: dto.pic_goals,
-                    start_date: new Date(dto.start_date),
-                    due_date: new Date(dto.due_date),
-                    status_goals: Number.isInteger(dto.status)?dto.status:Number(dto.status),
-                    type_goals: dto.type_goals,
-                    indikator: dto.indikator,
-                },
-                where: {
-                    id_goals : Number.isInteger(dto.id_goals)?dto.id_goals:Number(dto.id_goals),
-                }
-            });
+            editGoal = await this.goalRepo.updateGoals(dto.id_goals, dto);
             if(editGoal) {
                 statusCode = 200;
                 message = "Success Edit Goals.";
@@ -495,8 +570,7 @@ export class GoalsService {
             console.log(error);
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":editGoal};
-        return result;
+        return response(statusCode,message,editGoal);
     }
 
     async remapgoal(user: tbl_users, dto : any) {
@@ -535,8 +609,7 @@ export class GoalsService {
             console.log(error);
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":editGoal};
-        return result;
+        return response(statusCode,message,editGoal);
     }
 
     async delgoal(user: tbl_users, id_goals : number) {
@@ -563,7 +636,100 @@ export class GoalsService {
         }catch(error) {
             throw new InternalServerErrorException(error);
         }
-        let result = {"statusCode":statusCode,"message":message,"data":delGoal};
-        return delGoal;
+        return response(statusCode,message,delGoal);
+    }
+
+    async initialGoals(user: tbl_users) {
+        const tbl_goals = await this.prisma.tbl_goals.findMany({
+            where : {
+                parent_goals : 0
+            }
+        });
+        if(!tbl_goals || tbl_goals.length <= 0)
+        {
+            throw new NotFoundException("Data Tidak ditemukan");
+        }
+        return response(0,"Berhasil ambil data",tbl_goals);
+    }
+
+    async childGoals(user: tbl_users, parent_goals) {
+        const tbl_goals = await this.goalRepo.getGoals({
+            where : {
+                parent_goals : parent_goals
+            }
+        });
+        if(!tbl_goals || tbl_goals.length <= 0)
+        {
+            throw new NotFoundException("Data Tidak ditemukan");
+        }else{
+            let currentData = convertToGoalsArray(tbl_goals);
+            for (const iterator of tbl_goals) {
+                var child = await this.subchildGoals(iterator.id_goals);
+                for (const iterator of child) {
+                    iterator.kodefikasi = 'GOAL-'+iterator.parent_goals+'-'+iterator.id_goals
+                }
+                currentData[iterator.id_goals]["children"] = child;
+            }
+
+            var filtered = currentData.filter((el) => {
+                return el != null;
+            })
+
+            return response(0,"Berhasil ambil data",filtered);
+        }
+    }
+
+    async subchildGoals(parent_goals) : Promise<tbl_goals[] | []> {
+        const filter : { where : any} = {
+            where : {
+                parent_goals : parent_goals
+            }
+        }
+        const tbl_goals = await this.goalRepo.getGoals(filter);
+        return tbl_goals;
+    }
+    async  treeGoal(user : tbl_users, parent_goals) {
+        const param = {
+            // select : {
+            //     id_goals: true,
+            //     parent_goals: true,
+            //     parent_family: true
+            // },
+            where : {
+                parent_family : parent_goals
+            },
+            orderBy : {
+                parent_goals : 'asc'
+            }
+        }
+        const tbl_goals = await this.goalRepo.getGoals(param)
+        if(!tbl_goals || tbl_goals.length <= 0)
+        {
+            throw new NotFoundException("Data Tidak ditemukan");
+        }
+        let final = recurseBuildTree(tbl_goals, 0);
+        return response(0,"Berhasil ambil data", final);
+    }
+
+    async searchGoal(user: tbl_users, searchTerm) {
+        if(searchTerm == null || searchTerm.trim().length < 8) {
+            throw new BadRequestException("Parameter pencarian kosong / kurang dari 8 karakter.")
+        }
+        const filter = {
+            take: 5,
+            where : {
+                status_goals : 1,
+                title_goals : {
+                    contains : searchTerm
+                }
+            }
+        }
+        var searchRes = await this.goalRepo.getGoals(filter);
+        if(searchRes.length <= 0)
+        {
+            throw new NotFoundException("Data tidak ditemukan");
+        }
+        const result = convertToGoalsArray(searchRes);
+        return response(0,"Berhasil ambil data",result.filter((el) => { return el != null}));
     }
 }

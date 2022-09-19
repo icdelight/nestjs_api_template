@@ -1,4 +1,5 @@
-import {IsDate, IsInt, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import {IsDate, IsInt, IsJSON, isJSON, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class AddGoalsDto {
     @IsString()
@@ -13,15 +14,24 @@ export class AddGoalsDto {
     @IsNotEmpty()
     pic_goals: string;
 
+    @IsJSON()
+    type_goals: string;
+
+    @IsJSON()
+    indikator: string;
+
     @IsDate()
     @IsNotEmpty()
+    @Type(() => Date)
     start_date: Date;
 
     @IsDate()
     @IsNotEmpty()
+    @Type(() => Date)
     due_date: Date;
 
     @IsNumber()
     @IsNotEmpty()
+    @Type(() => Number)
     parent_goals: number;
 }
