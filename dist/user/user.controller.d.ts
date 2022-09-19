@@ -1,6 +1,5 @@
 import { UserServices } from "./user.service";
 import { tbl_users } from '@prisma/client';
-import { UserDetDto } from '../auth/dto';
 export declare class UserController {
     private userService;
     constructor(userService: UserServices);
@@ -11,12 +10,22 @@ export declare class UserController {
         message: string;
         data: any;
     }>;
+    getAllUserByPage(user: tbl_users, dto: any): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
+    findUserByName(user: tbl_users, dto: any): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     getAllMenu(user: tbl_users, dto: any): Promise<{
         statusCode: number;
         message: string;
         data: any;
     }>;
-    manageuser(user: tbl_users, dto: UserDetDto): Promise<{
+    manageuser(user: tbl_users, dto: any): Promise<{
         statusCode: number;
         message: string;
         data: any;

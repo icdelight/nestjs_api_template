@@ -9,6 +9,11 @@ export declare class AreaController {
         message: string;
         data: any;
     }>;
+    getAllParentArea(user: tbl_users, dto: any): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     getAllAreaPage(user: tbl_users, dto: any): Promise<{
         statusCode: number;
         message: string;
@@ -24,7 +29,7 @@ export declare class AreaController {
         message: string;
         data: any;
     }>;
-    getAllParentArea(user: tbl_users, dto: any): Promise<{
+    getAllParentsArea(user: tbl_users, dto: any): Promise<{
         statusCode: number;
         message: string;
         data: any;

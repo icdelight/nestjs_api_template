@@ -57,10 +57,11 @@ function recurseArea(allArea,parent) {
 @Injectable()
 export class UserServices{
     constructor(private config: ConfigService, private prisma: PrismaService, private jwt: JwtService) {}
-    async manageuser(user: tbl_users, dto : UserDetDto) {
+    async manageuser(user: tbl_users, dto : any) {
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
+        console.log(dto);
         if(user.role != "1") {
             throw new ForbiddenException('You dont have privileges.');
         }
@@ -78,18 +79,18 @@ export class UserServices{
             throw new BadRequestException('Active must be 1 or 0.');
         }
         let roles = "1";
-        if(dto.role.match("1") || dto.role.match("2")) {
+        // if(dto.role.match("1") || dto.role.match("2")) {
             roles = dto.role;
-        }else{
-            throw new BadRequestException('Roles must be 1 or 2.');
-        }
+        // }else{
+        //     throw new BadRequestException('Roles must be 1 or 2.');
+        // }
         try {
             updusers = await this.prisma.tbl_users.updateMany({
                 data: {
                     role : roles,
                     flag_active : flag,
-                    id_area : dto.area,
-                    id_sub_area : dto.subarea,
+                    id_area : Number.isInteger(dto.area) ? dto.area : Number(dto.area),
+                    id_sub_area : Number.isInteger(dto.subarea) ? dto.subarea : Number(dto.subarea),
                     firstName : dto.firstname,
                     lastName : dto.lastname,
                     apps : dto.apps,
@@ -106,6 +107,7 @@ export class UserServices{
                 message = "Failed manage user.";
             }
         }catch(error) {
+            console.log(error);
             throw new InternalServerErrorException(error);
         }
         let result = {"statusCode":statusCode,"message":message,"data":data};
@@ -120,21 +122,6 @@ export class UserServices{
             throw new ForbiddenException('You dont have privileges.')
         }
         let users = null;
-        // users = await this.prisma.tbl_users.findMany({
-        //     select: {
-        //         id_user: true,
-        //         name: true,
-        //         firstName: true,
-        //         lastName: true,
-        //         role: true,
-        //         flag_active: true,
-        //         createdAt: true,
-        //         updatedAt: true,
-        //         id_area: true,
-        //         id_sub_area: true,
-        //         apps: true,
-        //     }
-        // });
         if(user.role == '1') {
             users = await this.prisma.$queryRaw`SELECT name,pass,flag_active,createdAt,updatedAt,firstName,lastName,apps,role,c.role_name,a.id_area as id_area,desc_area,a.id_sub_area as id_sub_area,desc_sub_area,id_parent_area FROM users a INNER JOIN roles c ON a.role = c.id_role LEFT JOIN mst_area b ON a.id_sub_area = b.id_sub_area WHERE a.flag_active = 1;`;
         }else{
@@ -145,6 +132,88 @@ export class UserServices{
             statusCode = 200;
             message = "Success inquiry user";
             data = users;
+        }else{
+            statusCode = 0;
+            message = "Failed inquiry user";
+        }
+        let result = {"statusCode":statusCode,"message":message,"data":data};
+        return result;
+    }
+
+    async getAllUsersByPage(user: tbl_users,dto : any) {
+        let statusCode = 999;
+        let message = "Something went wrong.";
+        let data = null;
+        if(user.role != "1" && user.role != "2") {
+            throw new ForbiddenException('You dont have privileges.')
+        }
+        const perPage = 5;
+        let offset = 0;
+        let limit = offset + perPage;
+        if(dto.page != undefined && dto.page != '') {
+            offset = perPage*(dto.page-1);
+            limit = offset + perPage;
+        }
+        let users = null;
+        if(user.role == '1') {
+            users = await this.prisma.$queryRaw`SELECT name,pass,flag_active,createdAt,updatedAt,firstName,lastName,apps,role,c.role_name,a.id_area as id_area,desc_area,a.id_sub_area as id_sub_area,desc_sub_area,id_parent_area FROM users a INNER JOIN roles c ON a.role = c.id_role LEFT JOIN mst_area b ON a.id_sub_area = b.id_sub_area WHERE a.flag_active = 1 order by id_user asc limit ${offset},${limit};`;
+        }else{
+            users = await this.prisma.$queryRaw`SELECT name,pass,flag_active,createdAt,updatedAt,firstName,lastName,apps,role,c.role_name,a.id_area as id_area,desc_area,a.id_sub_area as id_sub_area,desc_sub_area,id_parent_area FROM users a INNER JOIN roles c ON a.role = c.id_role LEFT JOIN mst_area b ON a.id_sub_area = b.id_sub_area WHERE a.flag_active = 1 AND a.id_area = ${user.id_area} order by id_user asc limit ${offset},${limit};`;
+        }
+        
+        if(users) {
+            if(users.length > 0) {
+                statusCode = 200;
+                message = "Success inquiry user";
+                data = users;
+            }else{
+                statusCode = 0;
+                message = `Failed inquiry user, no data found at page : ${dto.page}`;
+            }
+        }else{
+            statusCode = 0;
+            message = "Failed inquiry user";
+        }
+        let result = {"statusCode":statusCode,"message":message,"data":data};
+        return result;
+    }
+
+    async getAllUsersByName(user: tbl_users,dto : any) {
+        let statusCode = 999;
+        let message = "Something went wrong.";
+        let data = null;
+        if(user.role != "1" && user.role != "2") {
+            throw new ForbiddenException('You dont have privileges.')
+        }
+        let filter = "";
+        // console.log(dto);
+        // const param = JSON.parse(dto);
+        if(dto.search != undefined && dto.search != '') {
+            filter = '%' + dto.search + '%';
+        }
+        const perPage = 5;
+        let offset = 0;
+        let limit = offset + perPage;
+        if(dto.page != undefined && dto.page != '') {
+            offset = perPage*(dto.page-1);
+            limit = offset + perPage;
+        }
+        let users = null;
+        if(user.role == '1') {
+            users = await this.prisma.$queryRaw`SELECT name,pass,flag_active,createdAt,updatedAt,firstName,lastName,apps,role,c.role_name,a.id_area as id_area,desc_area,a.id_sub_area as id_sub_area,desc_sub_area,id_parent_area FROM users a INNER JOIN roles c ON a.role = c.id_role LEFT JOIN mst_area b ON a.id_sub_area = b.id_sub_area WHERE a.flag_active = 1 AND (a.name like ${filter} OR a.firstName like ${filter} OR a.lastName like ${filter}) order by id_user asc limit ${offset},${limit};`;
+        }else{
+            users = await this.prisma.$queryRaw`SELECT name,pass,flag_active,createdAt,updatedAt,firstName,lastName,apps,role,c.role_name,a.id_area as id_area,desc_area,a.id_sub_area as id_sub_area,desc_sub_area,id_parent_area FROM users a INNER JOIN roles c ON a.role = c.id_role LEFT JOIN mst_area b ON a.id_sub_area = b.id_sub_area WHERE a.flag_active = 1 AND a.id_area = ${user.id_area} AND (a.name like ${filter} OR a.firstName like ${filter} OR a.lastName like ${filter}) order by id_user asc limit ${offset},${limit};`;
+        }
+        
+        if(users) {
+            if(users.length > 0) {
+                statusCode = 200;
+                message = "Success inquiry user";
+                data = users;
+            }else{
+                statusCode = 0;
+                message = `Failed inquiry user, no data found at page : ${dto.page}, filter : ${dto.search}`;
+            }
         }else{
             statusCode = 0;
             message = "Failed inquiry user";

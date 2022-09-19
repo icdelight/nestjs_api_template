@@ -14,6 +14,7 @@ const prisma_module_1 = require("./prisma/prisma.module");
 const user_module_1 = require("./user/user.module");
 const goals_module_1 = require("./goals/goals.module");
 const area_module_1 = require("./area/area.module");
+const cluster_module_1 = require("./cluster/cluster.module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -27,6 +28,7 @@ AppModule = __decorate([
             prisma_module_1.PrismaModule,
             goals_module_1.GoalsModule,
             area_module_1.AreaModule,
+            cluster_module_1.ClusterModule,
         ],
     })
 ], AppModule);

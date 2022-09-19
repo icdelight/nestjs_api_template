@@ -7,8 +7,9 @@
   "license": "UNLICENSED",
   "scripts": {
     "prisma:dev:deploy": "prisma migrate deploy",
-    "prisma:dev:pull": "prisma db pull",
+    "prisma:dev:pull": "prisma db pull && prisma generate",
     "prisma:dev:migrate": "prisma migrate dev",
+    "prisma:generate": "prisma generate",
     "prisma:test:deploy": "dotenv -e .env.test -- prisma migrate deploy",
     "prisma:test:migrate_deploy": "npx prisma db pull && npm run prisma:dev:migrate && npm run prisma:test:deploy",
     "prebuild": "rimraf dist",
