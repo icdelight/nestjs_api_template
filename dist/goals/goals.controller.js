@@ -30,6 +30,9 @@ let GoalsController = class GoalsController {
     allGoalsAdmin(user) {
         return this.goalService.allgoaladmin(user);
     }
+    FindGoalsByName(user, dto) {
+        return this.goalService.goalbyname(user, dto);
+    }
     addGoals(user, dto) {
         console.log(dto);
         return this.goalService.addgoal(user, dto);
@@ -67,6 +70,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], GoalsController.prototype, "allGoalsAdmin", null);
+__decorate([
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Post)('findgoals'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], GoalsController.prototype, "FindGoalsByName", null);
 __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, common_1.Post)('addgoals'),

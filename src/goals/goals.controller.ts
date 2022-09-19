@@ -31,6 +31,12 @@ export class GoalsController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Post('findgoals')
+    FindGoalsByName(@GetUser() user: tbl_users,   @Body() dto: any) {
+        return this.goalService.goalbyname(user,dto);
+    }
+
+    @HttpCode(HttpStatus.OK)
     @Post('addgoals')
     addGoals(@GetUser() user: tbl_users,  @Body() dto: any) {
         console.log(dto);

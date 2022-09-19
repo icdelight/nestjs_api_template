@@ -348,6 +348,53 @@ let GoalsService = class GoalsService {
         let result = { "statusCode": statusCode, "message": message, "data": allGoal };
         return result;
     }
+    async goalbyname(user, dto) {
+        let statusCode = 999;
+        let message = "Something went wrong.";
+        let data = null;
+        if (user.role != "1" && user.role != "2") {
+            throw new common_1.ForbiddenException('You dont have privileges.');
+        }
+        let allGoal = null;
+        let filter = "";
+        const perPage = 5;
+        let offset = 0;
+        let limit = offset + perPage;
+        if (dto.search != undefined && dto.search != '') {
+            filter = '%' + dto.search + '%';
+        }
+        try {
+            if (user.role == "2") {
+                if (dto.search != '') {
+                    allGoal = await this.prisma.$queryRaw `SELECT a.*,b.firstName as firstname,c.desc_sub_area as desc_area FROM goals a INNER JOIN users b ON a.pic_goals = b.name LEFT JOIN mst_area c ON a.id_area = c.id_sub_area WHERE a.id_area = ${user.id_area} AND (title_goals LIKE ${filter}) ORDER BY id_goals ASC LIMIT ${offset},${limit};`;
+                }
+                else {
+                    allGoal = await this.prisma.$queryRaw `SELECT a.*,b.firstName as firstname,c.desc_sub_area as desc_area FROM goals a INNER JOIN users b ON a.pic_goals = b.name LEFT JOIN mst_area c ON a.id_area = c.id_sub_area WHERE a.id_area = ${user.id_area} ORDER BY id_goals ASC LIMIT ${offset},${limit};`;
+                }
+            }
+            else {
+                if (dto.search != '') {
+                    allGoal = await this.prisma.$queryRaw `SELECT a.*,b.firstName as firstname,c.desc_sub_area as desc_area FROM goals a INNER JOIN users b ON a.pic_goals = b.name LEFT JOIN mst_area c ON a.id_area = c.id_sub_area WHERE (title_goals LIKE ${filter}) ORDER BY id_goals ASC LIMIT ${offset},${limit};`;
+                }
+                else {
+                    allGoal = await this.prisma.$queryRaw `SELECT a.*,b.firstName as firstname,c.desc_sub_area as desc_area FROM goals a INNER JOIN users b ON a.pic_goals = b.name LEFT JOIN mst_area c ON a.id_area = c.id_sub_area ORDER BY id_goals ASC LIMIT ${offset},${limit};`;
+                }
+            }
+            if (allGoal) {
+                statusCode = 200;
+                message = "Success Inquiry Goals.";
+            }
+            else {
+                statusCode = 0;
+                message = "Failed Inquiry Goals.";
+            }
+        }
+        catch (error) {
+            throw new common_1.InternalServerErrorException(error);
+        }
+        let result = { "statusCode": statusCode, "message": message, "data": allGoal };
+        return result;
+    }
     async addgoal(user, dto) {
         let statusCode = 999;
         let message = "Something went wrong.";

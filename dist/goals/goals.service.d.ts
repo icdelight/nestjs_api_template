@@ -29,6 +29,11 @@ export declare class GoalsService {
         message: string;
         data: any;
     }>;
+    goalbyname(user: tbl_users, dto: any): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     addgoal(user: tbl_users, dto: any): Promise<{
         statusCode: number;
         message: string;

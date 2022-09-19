@@ -14,6 +14,11 @@ export declare class GoalsController {
         message: string;
         data: any[];
     }>;
+    FindGoalsByName(user: tbl_users, dto: any): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     addGoals(user: tbl_users, dto: any): Promise<{
         statusCode: number;
         message: string;
