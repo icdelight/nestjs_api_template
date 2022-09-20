@@ -1,14 +1,8 @@
-import { BadRequestException, ConflictException, ConsoleLogger, ForbiddenException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, NotImplementedException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { GoalsDto } from "../auth/dto";
-import { AddGoalsDto } from "../auth/dto";
-import { EditGoalsDto } from "../auth/dto";
-import * as argon from "argon2";
-import { empty, PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { tbl_goals, tbl_users } from '@prisma/client';
-import { sleep } from "pactum";
 import { GoalRepository } from "./goals.repository";
 
 function response(statusCode: number, message: string, data:any)
@@ -505,7 +499,7 @@ export class GoalsService {
         return response(statusCode,message,finalData);
     }
 
-    async editgoal(user: tbl_users, dto : any) {
+    async editgoal(user: tbl_users, dto: any) {
         let statusCode = 999;
         let message = "Something went wrong.";
         if(user.role != "1") {
@@ -521,9 +515,9 @@ export class GoalsService {
                 statusCode = 0;
                 message = "Failed Edit Goals.";
             }
-        }catch(error) {
-            console.log(error);
-            throw new InternalServerErrorException(error);
+        } catch (error) {
+            message = this.config.get('APP_DEBUG') == "true" ? error.message : message
+            throw new NotImplementedException(message)
         }
         return response(statusCode,message,editGoal);
     }
@@ -539,12 +533,12 @@ export class GoalsService {
         const newMap = JSON.parse(dto.NewMap);
         // console.log(newMap);
         try {
-            for (const queryKey of Object.keys(newMap)) {
-                const obj = newMap[queryKey];
-                if(obj.parent_goals == '0' && obj.id_goals != '1') {
-                    throw new BadRequestException('Parent node is cannot more than one');
-                }
-            }
+            // for (const queryKey of Object.keys(newMap)) {
+            //     const obj = newMap[queryKey];
+            //     if(obj.parent_goals == '0' && obj.id_goals != '1') {
+            //         throw new BadRequestException('Parent node is cannot more than one');
+            //     }
+            // }
             for (const queryKey of Object.keys(newMap)) {
                 // console.log(queryKey,`${dto.NewMap[queryKey]}`);
                 const obj = newMap[queryKey];
@@ -561,8 +555,9 @@ export class GoalsService {
                 message = "Failed Edit Goals.";
             }
         }catch(error) {
-            console.log(error);
-            throw new InternalServerErrorException(error);
+            message = this.config.get('APP_DEBUG') == "true" ? error.message : message
+            throw new NotImplementedException(message)
+            // throw new InternalServerErrorException(error);
         }
         return response(statusCode,message,editGoal);
     }
@@ -588,8 +583,10 @@ export class GoalsService {
                 statusCode = 0;
                 message = "Failed Delete Goals.";
             }
-        }catch(error) {
-            throw new InternalServerErrorException(error);
+        } catch (error) {
+            message = this.config.get('APP_DEBUG') == "true" ? error.message : message
+            throw new NotImplementedException(message)
+            // throw new InternalServerErrorException(error);
         }
         return response(statusCode,message,delGoal);
     }
@@ -644,7 +641,9 @@ export class GoalsService {
         const tbl_goals = await this.goalRepo.getGoals(filter);
         return tbl_goals;
     }
-    async  treeGoal(user : tbl_users, parent_family) {
+    async treeGoal(user: tbl_users, parent_family, id_goals) {
+        const getGoal = await this.goalRepo.getGoals({where : {id_goals : id_goals}})
+        let parent_goal = convertToGoalsArray(getGoal)
         const param = {
             // select : {
             //     id_goals: true,
@@ -652,19 +651,21 @@ export class GoalsService {
             //     parent_family: true
             // },
             where : {
-                parent_family : parent_family
+                parent_family: parent_family,
             },
             orderBy : {
                 parent_goals : 'asc'
             }
         }
         const tbl_goals = await this.goalRepo.getGoals(param)
+        // console.log('id_goals', id_goals);
         if(!tbl_goals || tbl_goals.length <= 0)
         {
             throw new NotFoundException("Data Tidak ditemukan");
         }
-        let final = recurseBuildTree(tbl_goals, 0);
-        return response(200,"Berhasil ambil data", final);
+        let final = recurseBuildTree(tbl_goals, id_goals);
+        parent_goal[id_goals]['children'] = final;
+        return response(200, "Berhasil ambil data", parent_goal.filter((el) => { return el != null; }));
     }
 
     async searchGoal(user: tbl_users, searchTerm) {

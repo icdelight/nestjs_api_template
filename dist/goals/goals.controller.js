@@ -47,7 +47,13 @@ let GoalsController = class GoalsController {
         return this.goalService.remapgoal(user, dto);
     }
     treeGoals(user, dto) {
-        return this.goalService.treeGoal(user, dto);
+        if (dto.parent_family == undefined || dto.parent_family == null)
+            throw new common_1.BadRequestException("Parent Family belum didefinisikan");
+        if (dto.id_goals == undefined || dto.id_goals == null)
+            throw new common_1.BadRequestException("ID Goals belum didefinisikan");
+        var parent_family = parseInt(dto.parent_family);
+        var id_goals = parseInt(dto.id_goals);
+        return this.goalService.treeGoal(user, parent_family, id_goals);
     }
     searchGoal(user, searchTerm) {
         return this.goalService.searchGoal(user, searchTerm);
@@ -125,7 +131,7 @@ __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, common_1.Post)('treegoals'),
     __param(0, (0, decorator_1.GetUser)()),
-    __param(1, (0, common_1.Body)('parent_family', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
