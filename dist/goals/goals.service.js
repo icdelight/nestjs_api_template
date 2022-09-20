@@ -493,8 +493,8 @@ let GoalsService = class GoalsService {
             }
         }
         catch (error) {
-            console.log(error);
-            throw new common_1.InternalServerErrorException(error);
+            message = this.config.get('APP_DEBUG') == "true" ? error.message : message;
+            throw new common_1.NotImplementedException(message);
         }
         return response(statusCode, message, editGoal);
     }
@@ -510,12 +510,6 @@ let GoalsService = class GoalsService {
         try {
             for (const queryKey of Object.keys(newMap)) {
                 const obj = newMap[queryKey];
-                if (obj.parent_goals == '0' && obj.id_goals != '1') {
-                    throw new common_1.BadRequestException('Parent node is cannot more than one');
-                }
-            }
-            for (const queryKey of Object.keys(newMap)) {
-                const obj = newMap[queryKey];
                 editGoal = await this.prisma.$queryRaw `update goals set parent_goals = ${obj.parent_goals}, pic_goals = ${obj.pic_goals} where id_goals = ${obj.id_goals};`;
             }
             if (editGoal) {
@@ -528,8 +522,8 @@ let GoalsService = class GoalsService {
             }
         }
         catch (error) {
-            console.log(error);
-            throw new common_1.InternalServerErrorException(error);
+            message = this.config.get('APP_DEBUG') == "true" ? error.message : message;
+            throw new common_1.NotImplementedException(message);
         }
         return response(statusCode, message, editGoal);
     }
@@ -557,7 +551,8 @@ let GoalsService = class GoalsService {
             }
         }
         catch (error) {
-            throw new common_1.InternalServerErrorException(error);
+            message = this.config.get('APP_DEBUG') == "true" ? error.message : message;
+            throw new common_1.NotImplementedException(message);
         }
         return response(statusCode, message, delGoal);
     }
@@ -606,10 +601,12 @@ let GoalsService = class GoalsService {
         const tbl_goals = await this.goalRepo.getGoals(filter);
         return tbl_goals;
     }
-    async treeGoal(user, parent_family) {
+    async treeGoal(user, parent_family, id_goals) {
+        const getGoal = await this.goalRepo.getGoals({ where: { id_goals: id_goals } });
+        let parent_goal = convertToGoalsArray(getGoal);
         const param = {
             where: {
-                parent_family: parent_family
+                parent_family: parent_family,
             },
             orderBy: {
                 parent_goals: 'asc'
@@ -619,8 +616,9 @@ let GoalsService = class GoalsService {
         if (!tbl_goals || tbl_goals.length <= 0) {
             throw new common_1.NotFoundException("Data Tidak ditemukan");
         }
-        let final = recurseBuildTree(tbl_goals, 0);
-        return response(200, "Berhasil ambil data", final);
+        let final = recurseBuildTree(tbl_goals, id_goals);
+        parent_goal[id_goals]['children'] = final;
+        return response(200, "Berhasil ambil data", parent_goal.filter((el) => { return el != null; }));
     }
     async searchGoal(user, searchTerm) {
         if (searchTerm == null || searchTerm.trim().length < 8) {
