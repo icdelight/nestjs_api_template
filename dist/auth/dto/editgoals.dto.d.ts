@@ -5,5 +5,7 @@ export declare class EditGoalsDto {
     pic_goals: string;
     start_date: Date;
     due_date: Date;
-    status: number;
+    status_goals: number;
+    type_goals: JSON;
+    indikator: JSON;
 }

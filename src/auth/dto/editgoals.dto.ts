@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import {IsDate, IsInt, IsNotEmpty, isNotEmptyObject, IsNumber, IsOptional, IsString } from "class-validator";
+import {IsDate, IsInt, IsJSON, IsNotEmpty, isNotEmptyObject, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class EditGoalsDto {
     @IsNumber()
@@ -32,5 +32,13 @@ export class EditGoalsDto {
     @IsNumber()
     @IsOptional()
     @Type(() => Number)
-    status: number;
+    status_goals: number;
+
+    @IsJSON({ message: "Tipe Goal JSON tidak valid" })
+    @IsOptional()
+    type_goals: JSON;
+
+    @IsJSON({ message: "Indikator JSON tidak valid" })
+    @IsOptional()
+    indikator: JSON;
 }

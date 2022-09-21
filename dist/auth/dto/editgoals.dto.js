@@ -52,6 +52,16 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
-], EditGoalsDto.prototype, "status", void 0);
+], EditGoalsDto.prototype, "status_goals", void 0);
+__decorate([
+    (0, class_validator_1.IsJSON)({ message: "Tipe Goal JSON tidak valid" }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], EditGoalsDto.prototype, "type_goals", void 0);
+__decorate([
+    (0, class_validator_1.IsJSON)({ message: "Indikator JSON tidak valid" }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], EditGoalsDto.prototype, "indikator", void 0);
 exports.EditGoalsDto = EditGoalsDto;
 //# sourceMappingURL=editgoals.dto.js.map
