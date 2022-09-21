@@ -1,11 +1,10 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Req, Post, Query, UseGuards, ParseIntPipe, BadRequestException, HttpException } from '@nestjs/common';
 import { GoalsService } from "./goals.service";
-import { AuthGuard } from '@nestjs/passport';
 import { tbl_users } from '@prisma/client';
-import { query, Request } from 'express';
 import { GetUser } from '../auth/decorator';
 import { AddGoalsDto, EditGoalsDto } from '../auth/dto';
 import { JwtGuard } from '../auth/guard';
+import { RemapsGoalDto } from 'src/auth/dto/remapgoals.dto';
 
 @UseGuards(JwtGuard)
 @Controller('goals')
@@ -61,8 +60,8 @@ export class GoalsController {
 
     @HttpCode(HttpStatus.OK)
     @Post('remapgoals')
-    remapGoals(@GetUser() user: tbl_users,  @Body() dto: any) {
-        // console.log(dto);
+    remapGoals(@GetUser() user: tbl_users,  @Body() dto: RemapsGoalDto) {
+        // if(dto.NewMap == undefined || dto.NewMap == null) throw new BadRequestException("Data belum didefiniskan")
         return this.goalService.remapgoal(user,dto);
     }
 
