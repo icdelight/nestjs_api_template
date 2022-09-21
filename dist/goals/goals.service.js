@@ -279,6 +279,73 @@ let GoalsService = class GoalsService {
         }
         return response(statusCode, message, resTree);
     }
+    async alltreegoalcluster(user) {
+        let statusCode = 999;
+        let message = "Something went wrong.";
+        let data = null;
+        if (user.role != "1" && user.role != "2") {
+            throw new common_1.ForbiddenException('You dont have privileges.');
+        }
+        let allGoal = {};
+        let topGoal = null;
+        let resTree = [];
+        try {
+            topGoal = await this.prisma.tbl_goals.findMany({
+                select: {
+                    id_goals: true,
+                    title_goals: true,
+                    desc_goals: true,
+                    pic_goals: true,
+                    start_date: true,
+                    due_date: true,
+                    status_goals: true,
+                    progress: true,
+                    parent_goals: true,
+                    type_goals: true,
+                    last_modified_date: true,
+                    indikator: true,
+                },
+                orderBy: {
+                    parent_goals: 'asc',
+                }
+            });
+            let parent_id = 0;
+            if (topGoal && topGoal.length > 0) {
+                topGoal.forEach(element => {
+                    if (element !== null) {
+                        if (!allGoal.hasOwnProperty(element.parent_goals)) {
+                            allGoal[element.parent_goals] = {};
+                        }
+                        allGoal[element.parent_goals][element.id_goals] = element;
+                        parent_id = element.parent_goals;
+                    }
+                });
+                let obj = [];
+                parent_id = 0;
+                let parentGoal = {};
+                let ChildGoal = [];
+                resTree = recurseTree(allGoal, "0");
+                if (resTree[0] !== undefined) {
+                    statusCode = 200;
+                    message = "Success Inquiry Goals.";
+                }
+                else {
+                    statusCode = 0;
+                    message = "Failed Inquiry Goals.";
+                }
+            }
+            else {
+                statusCode = 0;
+                message = "Failed Inquiry Goals, Empty goals.";
+                resTree[0] = [];
+            }
+        }
+        catch (error) {
+            console.log(error);
+            throw new common_1.InternalServerErrorException(error);
+        }
+        return response(statusCode, message, resTree);
+    }
     async allgoaladmin(user) {
         console.log(user);
         let statusCode = 999;

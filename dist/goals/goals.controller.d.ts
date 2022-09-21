@@ -24,6 +24,11 @@ export declare class GoalsController {
         message: string;
         data: any;
     }>;
+    alltreeCluster(user: tbl_users): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     allGoalsAdmin(user: tbl_users): Promise<{
         statusCode: number;
         message: string;

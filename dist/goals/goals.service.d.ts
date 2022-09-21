@@ -19,6 +19,11 @@ export declare class GoalsService {
         message: string;
         data: any;
     }>;
+    alltreegoalcluster(user: tbl_users): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     allgoaladmin(user: tbl_users): Promise<{
         statusCode: number;
         message: string;

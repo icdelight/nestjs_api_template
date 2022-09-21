@@ -34,6 +34,9 @@ let GoalsController = class GoalsController {
     alltreeGoals(user) {
         return this.goalService.alltreegoal(user);
     }
+    alltreeCluster(user) {
+        return this.goalService.alltreegoalcluster(user);
+    }
     allGoalsAdmin(user) {
         return this.goalService.allgoaladmin(user);
     }
@@ -89,6 +92,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], GoalsController.prototype, "alltreeGoals", null);
+__decorate([
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Post)('alltreegoalscluster'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], GoalsController.prototype, "alltreeCluster", null);
 __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, common_1.Post)('allgoalsadmin'),

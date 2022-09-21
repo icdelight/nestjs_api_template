@@ -35,6 +35,12 @@ export class GoalsController {
     alltreeGoals(@GetUser() user: tbl_users) {
         return this.goalService.alltreegoal(user);
     }
+    
+    @HttpCode(HttpStatus.OK)
+    @Post('alltreegoalscluster')
+    alltreeCluster(@GetUser() user: tbl_users) {
+        return this.goalService.alltreegoalcluster(user);
+    }
 
     @HttpCode(HttpStatus.OK)
     @Post('allgoalsadmin')
