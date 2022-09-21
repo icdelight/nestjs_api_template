@@ -42,6 +42,8 @@ let GoalsController = class GoalsController {
         return this.goalService.addgoal(user, dto);
     }
     editGoals(user, dto) {
+        dto.type_goals = JSON.parse(dto.type_goals.toString());
+        dto.indikator = JSON.parse(dto.indikator.toString());
         return this.goalService.editgoal(user, dto);
     }
     remapGoals(user, dto) {

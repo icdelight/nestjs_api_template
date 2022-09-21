@@ -451,7 +451,7 @@ export class GoalsService {
                     due_date: new Date(dto.due_date),
                     status_goals: Number("1"),
                     progress: Number("0"),
-                    parent_goals: Number.isInteger(dto.parent_goals)?dto.parent_goals:Number(dto.parent_goals),
+                    parent_goals: Number.isInteger(dto.parent_goals) ? dto.parent_goals : Number(dto.parent_goals),
                     type_goals: JSON.parse(dto.type_goals),
                     indikator: JSON.parse(dto.indikator),
                 }

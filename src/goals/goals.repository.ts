@@ -43,7 +43,7 @@ export class GoalRepository {
             },
             data : {
                 kodefikasi: finalKodefikasi,
-                parent_family: parent_data.parent_goals == 0 ? parent_data.id_goals : parent_data.parent_family
+                parent_family: parent_data.parent_goals == 0 || parent_data.parent_goals == "0" ? parent_data.id_goals : parent_data.parent_family
             }
         })
         return goal;
