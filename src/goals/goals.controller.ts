@@ -52,9 +52,12 @@ export class GoalsController {
     @Post('editgoals')
     editGoals(@GetUser() user: tbl_users,  @Body() dto: EditGoalsDto) {
         // console.log(dto);
-        // const req = JSON.parse(dto);
-        // console.log(dto.id_goals);
+        // console.log(dto);
         // return true;
+        /** JSON String to JSON object */
+        dto.type_goals = JSON.parse(dto.type_goals.toString())
+        dto.indikator = JSON.parse(dto.indikator.toString())
+        /** JSON String to JSON object */
         return this.goalService.editgoal(user,dto);
     }
 
