@@ -55,9 +55,9 @@ function recurseTree(allGoal, parent) {
                     parentGoal[key]["status_goals"] = obj['status_goals'];
                     parentGoal[key]["progress"] = obj['progress'];
                     parentGoal[key]["parent_goals"] = obj['parent_goals'];
-                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ? JSON.parse(obj['type_goals']) : style_col;
+                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ? (obj['type_goals']) : style_col;
                     parentGoal[key]["last_modified_date"] = obj['firstName'];
-                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ? JSON.parse(obj['indikator']) : indikator;
+                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ? (obj['indikator']) : indikator;
                 }
             });
             if (allGoal[key]) {
@@ -102,10 +102,10 @@ function recurseTreeAdmin(allGoal, parent) {
                     parentGoal[key]["status_goals"] = obj['status_goals'];
                     parentGoal[key]["progress"] = obj['progress'];
                     parentGoal[key]["parent"] = obj['parent'];
-                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ? JSON.parse(obj['type_goals']) : style_col;
+                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ? (obj['type_goals']) : style_col;
                     parentGoal[key]["last_modified_date"] = obj['last_modified_date'];
                     parentGoal[key]["firstName"] = obj['name'];
-                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ? JSON.parse(obj['indikator']) : indikator;
+                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ? (obj['indikator']) : indikator;
                 }
             });
             if (allGoal[key]) {
@@ -419,6 +419,7 @@ let GoalsService = class GoalsService {
             throw new common_1.ForbiddenException('You dont have privileges.');
         }
         var finalData = null;
+        console.log(dto);
         try {
             const addGoal = await this.goalRepo.createGoal({
                 title_goals: dto.title_goals,
@@ -470,6 +471,7 @@ let GoalsService = class GoalsService {
             }
         }
         catch (error) {
+            console.log(error);
             throw new common_1.InternalServerErrorException(error);
         }
         return response(statusCode, message, finalData);

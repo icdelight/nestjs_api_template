@@ -43,6 +43,9 @@ let AreaController = class AreaController {
     addArea(user, dto) {
         return this.areaService.addArea(user, dto);
     }
+    addRegion(user, dto) {
+        return this.areaService.addRegion(user, dto);
+    }
     editArea(user, dto) {
         return this.areaService.editArea(user, dto);
     }
@@ -103,6 +106,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, dto_1.AreaDto]),
     __metadata("design:returntype", void 0)
 ], AreaController.prototype, "addArea", null);
+__decorate([
+    (0, common_1.Post)('addregion'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], AreaController.prototype, "addRegion", null);
 __decorate([
     (0, common_1.Post)('editarea'),
     __param(0, (0, decorator_1.GetUser)()),

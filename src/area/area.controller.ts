@@ -46,6 +46,11 @@ export class AreaController {
         return this.areaService.addArea(user,dto);
     }
 
+    @Post('addregion')
+    addRegion(@GetUser() user: tbl_users, @Body() dto: any) {
+        return this.areaService.addRegion(user,dto);
+    }
+
     @Post('editarea')
     editArea(@GetUser() user: tbl_users, @Body() dto: any) {
         return this.areaService.editArea(user,dto);

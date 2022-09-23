@@ -62,14 +62,15 @@ export class AreaServices{
         if(user.role != "1" && user.role != "2") {
             throw new ForbiddenException('You dont have privileges.');
         }
+        // console.log(dto);
         if(user.role != '1' && dto.id_area != undefined && user.id_area != dto.id_area) {
             throw new ForbiddenException('You dont have privileges.');
         }
         let topArea = [];
         try {
-            console.log(user.role);
+            // console.log(user.role);
             if(dto.id_area != undefined && user.role == '1') {
-                topArea = await this.prisma.$queryRaw`SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_area = ${dto.id_area} AND a.id_sub_area != ${dto.id_sub_area} order by a.id_area asc, a.id_parent_area asc;`;
+                topArea = await this.prisma.$queryRaw`SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_sub_area != ${dto.id_sub_area} order by a.id_area asc, a.id_parent_area asc;`;
                 // console.log(`SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_area = ${dto.id_area} order by a.id_area asc, a.id_parent_area asc;`);
             }else if(user.role == '2') {
                 topArea = await this.prisma.$queryRaw`SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_area = ${user.id_area} AND a.id_sub_area != ${dto.id_sub_area} order by a.id_area asc, a.id_parent_area asc;`;
@@ -108,7 +109,7 @@ export class AreaServices{
         }
         let topArea = [];
         try {
-            console.log(user.role);
+            // console.log(user.role);
             if(dto.id_area != undefined && user.role == '1') {
                 topArea = await this.prisma.$queryRaw`SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_parent_area in ('0','1') order by a.id_area asc, a.id_parent_area asc;`;
                 // console.log(`SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_area = ${dto.id_area} AND a.id_sub_area = ${dto.id_area} order by a.id_area asc, a.id_parent_area asc;`);
@@ -308,7 +309,7 @@ export class AreaServices{
         let parent_id = 0;
         let resArea = [];
         try {
-            topArea = await this.prisma.mst_area.findMany();
+            // topArea = await this.prisma.mst_area.findMany();
             topArea = await this.prisma.$queryRaw`SELECT * FROM mst_area where id_parent_area in (1,0) {where}`;
             // console.log(topArea);
             topArea.forEach(element => {
@@ -370,6 +371,59 @@ export class AreaServices{
             }else{
                 statusCode = 0;
                 message = "Failed inquiry area";
+            }
+        }catch(error) {
+            console.log(error);
+            throw new InternalServerErrorException(error);
+        }
+        let result = {"statusCode":statusCode,"message":message,"data":data};
+        return result;
+    }
+
+    async addRegion(user: tbl_users,dto : any) {
+        let statusCode = 999;
+        let message = "Something went wrong.";
+        let data = null;
+        if(user.role != "1") {
+            throw new ForbiddenException('You dont have privileges.')
+        }
+        let addArea = null;
+        let lastIdArea = null;
+        let lastIdReg = null;
+        try {
+            lastIdArea = await this.prisma.mst_area.findFirst({
+                select:{
+                    id_area: true,
+                    id_sub_area: true,
+                    id_parent_area: true,
+                },
+                orderBy:{
+                    id_sub_area: 'desc',
+                }
+            });
+            if(lastIdArea.id_sub_area !== undefined) {
+                const newIdArea = Number(lastIdArea.id_sub_area) + 1;
+                addArea = await this.prisma.mst_area.create({
+                    data: {
+                        id_area: newIdArea,
+                        id_sub_area: newIdArea,
+                        desc_area: dto.desc_area,
+                        desc_sub_area: dto.desc_area,
+                        id_parent_area: 1,
+                        active: Number.isInteger(dto.active) ? dto.active : Number(dto.active),
+                    }
+                })
+
+                if(addArea) {
+                    statusCode = 200;
+                    message = "Success inquiry area";
+                    data = addArea;
+                }else{
+                    statusCode = 0;
+                    message = "Failed inquiry area";
+                }
+            }else{
+                throw new InternalServerErrorException('Something went wrong.');
             }
         }catch(error) {
             console.log(error);

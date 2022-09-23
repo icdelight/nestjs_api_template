@@ -39,6 +39,11 @@ export declare class AreaController {
         message: string;
         data: any;
     }>;
+    addRegion(user: tbl_users, dto: any): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     editArea(user: tbl_users, dto: any): Promise<{
         statusCode: number;
         message: string;
