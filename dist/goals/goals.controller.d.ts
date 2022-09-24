@@ -30,6 +30,11 @@ export declare class GoalsController {
         message: string;
         data: any;
     }>;
+    allGoalsCluster(user: tbl_users, dto: any): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     addGoals(user: tbl_users, dto: AddGoalsDto): Promise<{
         statusCode: number;
         message: string;
@@ -49,7 +54,7 @@ export declare class GoalsController {
         message: string;
         data: any;
     }>;
-    searchGoal(user: tbl_users, searchTerm: string): Promise<{
+    searchGoal(user: tbl_users, dto: any): Promise<{
         statusCode: number;
         message: string;
         data: any;

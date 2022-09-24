@@ -38,6 +38,9 @@ let GoalsController = class GoalsController {
     allGoalsAdmin(user) {
         return this.goalService.allgoaladmin(user);
     }
+    allGoalsCluster(user, dto) {
+        return this.goalService.alltreegoalcluster(user, dto);
+    }
     addGoals(user, dto) {
         return this.goalService.addgoal(user, dto);
     }
@@ -58,8 +61,8 @@ let GoalsController = class GoalsController {
         var id_goals = parseInt(dto.id_goals);
         return this.goalService.treeGoal(user, parent_family, id_goals);
     }
-    searchGoal(user, searchTerm) {
-        return this.goalService.searchGoal(user, searchTerm);
+    searchGoal(user, dto) {
+        return this.goalService.searchGoal(user, dto);
     }
 };
 __decorate([
@@ -105,6 +108,15 @@ __decorate([
 ], GoalsController.prototype, "allGoalsAdmin", null);
 __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Post)('alltreegoalscluster'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], GoalsController.prototype, "allGoalsCluster", null);
+__decorate([
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, common_1.Post)('addgoals'),
     __param(0, (0, decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
@@ -143,9 +155,9 @@ __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, common_1.Post)('searchgoals'),
     __param(0, (0, decorator_1.GetUser)()),
-    __param(1, (0, common_1.Body)('searchTerm')),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], GoalsController.prototype, "searchGoal", null);
 GoalsController = __decorate([

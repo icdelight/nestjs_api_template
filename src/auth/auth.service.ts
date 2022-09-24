@@ -76,7 +76,7 @@ export class AuthServices{
         const user = await this.prisma.$queryRaw<tbl_users[]>`SELECT a.*,b.role_name as role_name,c.desc_area as desc_area,c.desc_sub_area as desc_sub_area FROM users a INNER JOIN roles b ON a.role = b.id_role LEFT JOIN mst_area c ON a.id_sub_area = c.id_sub_area WHERE a.name = ${dto.user} and a.flag_active = 1;`;
         // const user = await this.prisma.$queryRaw`SELECT name,pass,flag_active,createdAt,updatedAt,firstName,lastName,apps,role,a.id_area as id_area,desc_area,a.id_sub_area as id_sub_area,desc_sub_area,id_parent_area FROM users a INNER JOIN mst_area b ON a.id_sub_area = b.id_sub_area WHERE a.name = ${dto.user} and a.flag_active = 1;`;
         //if user doesnt exist
-        console.log(user);
+        // console.log(user);
         if(!user || user.length <= 0) {
             throw new ForbiddenException('Credential incorrect.');
         }

@@ -55,9 +55,12 @@ function recurseTree(allGoal, parent) {
                     parentGoal[key]["status_goals"] = obj['status_goals'];
                     parentGoal[key]["progress"] = obj['progress'];
                     parentGoal[key]["parent_goals"] = obj['parent_goals'];
-                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ? (obj['type_goals']) : style_col;
+                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ? JSON.parse(obj['type_goals']) : style_col;
                     parentGoal[key]["last_modified_date"] = obj['firstName'];
-                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ? (obj['indikator']) : indikator;
+                    parentGoal[key]["id_cluster"] = obj['id_cluster'] !== "" && obj['id_cluster'] !== null ? (obj['id_cluster']) : '';
+                    parentGoal[key]["id_area"] = obj['id_area'] !== "" && obj['id_area'] !== null ? (obj['id_area']) : '';
+                    parentGoal[key]["clustered"] = obj['clustered'] !== "" && obj['clustered'] !== null ? (obj['clustered']) : '';
+                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ? JSON.parse(obj['indikator']) : indikator;
                 }
             });
             if (allGoal[key]) {
@@ -105,6 +108,8 @@ function recurseTreeAdmin(allGoal, parent) {
                     parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ? (obj['type_goals']) : style_col;
                     parentGoal[key]["last_modified_date"] = obj['last_modified_date'];
                     parentGoal[key]["firstName"] = obj['name'];
+                    parentGoal[key]["id_cluster"] = obj['id_cluster'] !== "" && obj['id_cluster'] !== null ? (obj['id_cluster']) : '';
+                    parentGoal[key]["id_area"] = obj['id_area'] !== "" && obj['id_area'] !== null ? (obj['id_area']) : '';
                     parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ? (obj['indikator']) : indikator;
                 }
             });
@@ -117,6 +122,32 @@ function recurseTreeAdmin(allGoal, parent) {
         });
     }
     return resTree;
+}
+function recurseCluster(newObj, allGoal, obj, idxClust) {
+    let resObj = [];
+    for (let objPar in allGoal) {
+        if (allGoal[objPar].hasOwnProperty(obj)) {
+            if (!newObj[objPar] && !newObj.hasOwnProperty(objPar)) {
+                newObj[objPar] = {};
+            }
+            if (!newObj[objPar].hasOwnProperty(obj)) {
+                newObj[objPar][obj] = allGoal[objPar][obj];
+                resObj = Object.entries(newObj);
+                const sorted = Object.keys(newObj)
+                    .sort()
+                    .reduce((accumulator, key) => {
+                    accumulator[key] = newObj[key];
+                    return accumulator;
+                }, {});
+                newObj = sorted;
+                if (!idxClust.includes(`${objPar}_${obj}`)) {
+                    idxClust.push(`${objPar}_${obj}`);
+                    recurseCluster(newObj, allGoal, objPar, idxClust);
+                }
+            }
+        }
+    }
+    return newObj;
 }
 function convertToGoalsArray(tbl_goals, kodefikasi = 'GOAL') {
     let resData = [];
@@ -140,6 +171,8 @@ function convertToGoalsArray(tbl_goals, kodefikasi = 'GOAL') {
         finalData[stringID]["type_goals"] = element.type_goals ? element.type_goals : null;
         finalData[stringID]["indikator"] = element.indikator ? element.indikator : null;
         finalData[stringID]["kodefikasi"] = kodefikasi + '-' + element.id_goals;
+        finalData[stringID]['id_area'] = element.id_area;
+        finalData[stringID]['id_cluster'] = element.id_cluster;
         finalData[stringID]["children"] = [];
         resData[stringID] = finalData[stringID];
         finalData = {};
@@ -168,6 +201,8 @@ function recurseBuildTree(goals, parent, kodefikasi = 'GOAL') {
         final[(element.id_goals)]['status_goals'] = element.status_goals;
         final[(element.id_goals)]['indikator'] = element.indikator;
         final[(element.id_goals)]['type_goals'] = element.type_goals;
+        final[(element.id_goals)]['id_area'] = element.id_area;
+        final[(element.id_goals)]['id_cluster'] = element.id_cluster;
         final[(element.id_goals)]['kodefikasi'] = kodefikasi + '-' + element.id_goals.toString();
         final[(element.id_goals)]['children'] = recurseBuildTree(goals, nextParent, kodefikasi + '-' + element.id_goals.toString());
     });
@@ -328,6 +363,73 @@ let GoalsService = class GoalsService {
             else {
                 statusCode = 0;
                 message = "Failed Inquiry Goals, Empty Goals.";
+            }
+        }
+        catch (error) {
+            console.log(error);
+            throw new common_1.InternalServerErrorException(error);
+        }
+        return response(statusCode, message, resTree);
+    }
+    async alltreegoalcluster(user, dto) {
+        let statusCode = 999;
+        let message = "Something went wrong.";
+        let data = null;
+        if (user.role != "1" && user.role != "2") {
+            throw new common_1.ForbiddenException('You dont have privileges.');
+        }
+        let allGoal = {};
+        let allGoalClust = {};
+        let topGoal = null;
+        let clustGoal = null;
+        let resTree = [];
+        let idxClust = [];
+        try {
+            clustGoal = await this.prisma.$queryRaw `SELECT *,'1' as clustered FROM goals WHERE id_cluster = ${dto.id_cluster} AND parent_family = ${dto.parent_family} ORDER BY parent_goals asc;`;
+            topGoal = await this.prisma.$queryRaw `SELECT *,'1' as clustered FROM goals ORDER BY parent_goals asc;`;
+            let parent_id = 0;
+            if (topGoal && topGoal.length > 0) {
+                topGoal.forEach(element => {
+                    if (element !== null) {
+                        if (!allGoal.hasOwnProperty(element.parent_goals)) {
+                            allGoal[element.parent_goals] = {};
+                        }
+                        allGoal[element.parent_goals][element.id_goals] = element;
+                        parent_id = element.parent_goals;
+                    }
+                });
+                clustGoal.forEach(element => {
+                    idxClust.push(`${element.parent_goals}_${element.id_goals}`);
+                    if (element !== null) {
+                        if (!allGoalClust.hasOwnProperty(element.parent_goals)) {
+                            allGoalClust[element.parent_goals] = {};
+                        }
+                        allGoalClust[element.parent_goals][element.id_goals] = element;
+                        parent_id = element.parent_goals;
+                    }
+                });
+                let newObj = allGoalClust;
+                for (let obj in allGoalClust) {
+                    recurseCluster(newObj, allGoal, obj, idxClust);
+                }
+                let obj = [];
+                parent_id = 0;
+                let parentGoal = {};
+                let ChildGoal = [];
+                resTree = recurseTree(newObj, "0");
+                if (resTree[0] !== undefined) {
+                    statusCode = 200;
+                    message = "Success Inquiry Goals.";
+                }
+                else {
+                    statusCode = 0;
+                    message = "Failed Inquiry Goals.";
+                }
+            }
+            else {
+                statusCode = 0;
+                message = "Failed Inquiry Goals, Empty goals.";
+                resTree[0] = [];
             }
         }
         catch (error) {
@@ -622,14 +724,16 @@ let GoalsService = class GoalsService {
         parent_goal[id_goals]['children'] = final;
         return response(200, "Berhasil ambil data", parent_goal.filter((el) => { return el != null; }));
     }
-    async searchGoal(user, searchTerm) {
-        if (searchTerm == null || searchTerm.trim().length < 8) {
-            throw new common_1.BadRequestException("Parameter pencarian kosong / kurang dari 8 karakter.");
+    async searchGoal(user, dto) {
+        const searchTerm = dto.searchTerm;
+        if (searchTerm == null || searchTerm.trim().length < 3) {
+            throw new common_1.BadRequestException("Parameter pencarian kosong / kurang dari 3 karakter.");
         }
         const filter = {
             take: 5,
             where: {
                 status_goals: 1,
+                parent_family: Number.isInteger(dto.parent_family) ? dto.parent_family : Number(dto.parent_family),
                 title_goals: {
                     contains: searchTerm
                 }

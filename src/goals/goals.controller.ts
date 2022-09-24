@@ -42,6 +42,12 @@ export class GoalsController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Post('alltreegoalscluster')
+    allGoalsCluster(@GetUser() user: tbl_users, @Body() dto: any) {
+        return this.goalService.alltreegoalcluster(user, dto);
+    }
+
+    @HttpCode(HttpStatus.OK)
     @Post('addgoals')
     addGoals(@GetUser() user: tbl_users, @Body() dto: AddGoalsDto) {
         // console.log('DTO', dto); return false;
@@ -80,8 +86,8 @@ export class GoalsController {
 
     @HttpCode(HttpStatus.OK)
     @Post('searchgoals')
-    searchGoal(@GetUser() user: tbl_users,  @Body('searchTerm') searchTerm: string) {
-        return this.goalService.searchGoal(user,searchTerm);
+    searchGoal(@GetUser() user: tbl_users,  @Body() dto: any) {
+        return this.goalService.searchGoal(user,dto);
     }
 
 }

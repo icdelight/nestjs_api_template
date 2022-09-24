@@ -24,6 +24,11 @@ export declare class GoalsService {
         message: string;
         data: any;
     }>;
+    alltreegoalcluster(user: tbl_users, dto: any): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     goalbyparentRec(user: tbl_users, id_goals: number): Promise<any>;
     goalbyid(user: tbl_users, id_goals: number): Promise<{
         statusCode: number;
@@ -70,7 +75,7 @@ export declare class GoalsService {
         message: string;
         data: any;
     }>;
-    searchGoal(user: tbl_users, searchTerm: any): Promise<{
+    searchGoal(user: tbl_users, dto: any): Promise<{
         statusCode: number;
         message: string;
         data: any;
