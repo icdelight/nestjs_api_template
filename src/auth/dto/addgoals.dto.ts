@@ -4,6 +4,10 @@ import {IsDate, IsJSON, IsNotEmpty, IsNumber, IsString } from "class-validator";
 export class AddGoalsDto {
     @IsString()
     @IsNotEmpty({message : "$property kosong."})
+    issue_goals: string;
+
+    @IsString()
+    @IsNotEmpty({message : "$property kosong."})
     title_goals: string;
 
     @IsString()
@@ -34,4 +38,14 @@ export class AddGoalsDto {
     @IsNotEmpty({message : "$property kosong."})
     @Type(() => Number)
     parent_goals: number;
+
+    @IsNumber()
+    @IsNotEmpty({message : "$property kosong."})
+    @Type(() => Number)
+    id_area: number;
+
+    @IsNumber()
+    @IsNotEmpty({message : "$property kosong."})
+    @Type(() => Number)
+    id_cluster: number;
 }

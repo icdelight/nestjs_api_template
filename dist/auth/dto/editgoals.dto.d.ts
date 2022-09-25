@@ -1,5 +1,6 @@
 export declare class EditGoalsDto {
     id_goals: number;
+    issue_goals: string;
     title_goals: string;
     desc_goals: string;
     pic_goals: string;
@@ -8,4 +9,6 @@ export declare class EditGoalsDto {
     status_goals: number;
     type_goals: JSON;
     indikator: JSON;
+    id_cluster: number;
+    id_area: number;
 }

@@ -24,6 +24,11 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
+], EditGoalsDto.prototype, "issue_goals", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
 ], EditGoalsDto.prototype, "title_goals", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
@@ -63,5 +68,17 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
 ], EditGoalsDto.prototype, "indikator", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], EditGoalsDto.prototype, "id_cluster", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], EditGoalsDto.prototype, "id_area", void 0);
 exports.EditGoalsDto = EditGoalsDto;
 //# sourceMappingURL=editgoals.dto.js.map

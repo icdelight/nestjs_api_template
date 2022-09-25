@@ -47,6 +47,7 @@ model tbl_menu {
 
 model tbl_goals {
   id_goals           Int       @id @default(autoincrement())
+  issue_goals        String?   @db.VarChar(150)
   title_goals        String?   @db.VarChar(150)
   desc_goals         String?   @db.VarChar(500)
   pic_goals          String?   @db.VarChar(150)

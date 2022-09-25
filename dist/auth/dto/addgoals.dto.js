@@ -18,6 +18,11 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)({ message: "$property kosong." }),
     __metadata("design:type", String)
+], AddGoalsDto.prototype, "issue_goals", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)({ message: "$property kosong." }),
+    __metadata("design:type", String)
 ], AddGoalsDto.prototype, "title_goals", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
@@ -55,5 +60,17 @@ __decorate([
     (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], AddGoalsDto.prototype, "parent_goals", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsNotEmpty)({ message: "$property kosong." }),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], AddGoalsDto.prototype, "id_area", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsNotEmpty)({ message: "$property kosong." }),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], AddGoalsDto.prototype, "id_cluster", void 0);
 exports.AddGoalsDto = AddGoalsDto;
 //# sourceMappingURL=addgoals.dto.js.map

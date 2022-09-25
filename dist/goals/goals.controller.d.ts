@@ -2,6 +2,7 @@ import { GoalsService } from "./goals.service";
 import { tbl_users } from '@prisma/client';
 import { AddGoalsDto, EditGoalsDto } from '../auth/dto';
 import { RemapsGoalDto } from 'src/auth/dto/remapgoals.dto';
+import { Response } from 'express';
 export declare class GoalsController {
     private goalService;
     constructor(goalService: GoalsService);
@@ -59,4 +60,5 @@ export declare class GoalsController {
         message: string;
         data: any;
     }>;
+    downloadExcelGoal(user: tbl_users, parent_family: number, res: Response): Promise<void>;
 }
