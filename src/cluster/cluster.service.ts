@@ -110,11 +110,20 @@ export class ClusterServices{
         }
         try {
             if(user.role == "2") {
-                topCluster = await this.prisma.$queryRaw`SELECT a.*,b.desc_area as desc_area FROM cluster a LEFT JOIN mst_area b ON a.id_area = b.id_sub_area WHERE a.id_area = ${user.id_area} AND (a.nama_cluster like ${filter} OR b.desc_area like ${filter}) order by a.id_area asc limit ${offset},${limit};`;
-                // console.log(`SELECT a.*,b.desc_area as desc_area FROM cluster a LEFT JOIN mst_area b ON a.id_area = b.id_sub_area WHERE a.id_area = ${user.id_area} AND (a.nama_cluster like ${filter} OR b.desc_area like ${filter}) order by a.id_area asc limit ${offset},${limit};`);
+                if(dto.search != undefined && dto.search != '') {
+                    topCluster = await this.prisma.$queryRaw`SELECT a.*,b.desc_area as desc_area FROM cluster a LEFT JOIN mst_area b ON a.id_area = b.id_sub_area WHERE a.id_area = ${user.id_area} AND (a.nama_cluster like ${filter} OR b.desc_area like ${filter}) order by a.id_area asc limit ${offset},${limit};`;
+                    // console.log(`SELECT a.*,b.desc_area as desc_area FROM cluster a LEFT JOIN mst_area b ON a.id_area = b.id_sub_area WHERE a.id_area = ${user.id_area} AND (a.nama_cluster like ${filter} OR b.desc_area like ${filter}) order by a.id_area asc limit ${offset},${limit};`);
+                }else{
+                    topCluster = await this.prisma.$queryRaw`SELECT a.*,b.desc_area as desc_area FROM cluster a LEFT JOIN mst_area b ON a.id_area = b.id_sub_area WHERE a.id_area = ${user.id_area} order by a.id_area asc limit ${offset},${limit};`;
+                }
             }else{
-                topCluster = await this.prisma.$queryRaw`SELECT a.*,b.desc_area as desc_area FROM cluster a LEFT JOIN mst_area b ON a.id_area = b.id_sub_area WHERE (a.nama_cluster like ${filter} OR b.desc_area like ${filter}) order by a.id_area asc limit ${offset},${limit};`;
-                // console.log(`SELECT a.*,b.desc_area as desc_area FROM cluster a LEFT JOIN mst_area b ON a.id_area = b.id_sub_area WHERE (a.nama_cluster like ${filter} OR b.desc_area like ${filter}) order by a.id_area asc limit ${offset},${limit};`);
+                if(dto.search != undefined && dto.search != '') {
+                    topCluster = await this.prisma.$queryRaw`SELECT a.*,b.desc_area as desc_area FROM cluster a LEFT JOIN mst_area b ON a.id_area = b.id_sub_area WHERE (a.nama_cluster like ${filter} OR b.desc_area like ${filter}) order by a.id_area asc limit ${offset},${limit};`;
+                    // console.log(`SELECT a.*,b.desc_area as desc_area FROM cluster a LEFT JOIN mst_area b ON a.id_area = b.id_sub_area WHERE (a.nama_cluster like ${filter} OR b.desc_area like ${filter}) order by a.id_area asc limit ${offset},${limit};`);
+                }else{
+                    topCluster = await this.prisma.$queryRaw`SELECT a.*,b.desc_area as desc_area FROM cluster a LEFT JOIN mst_area b ON a.id_area = b.id_sub_area order by a.id_area asc limit ${offset},${limit};`;
+                    // console.log(`SELECT a.*,b.desc_area as desc_area FROM cluster a LEFT JOIN mst_area b ON a.id_area = b.id_sub_area WHERE (a.nama_cluster like ${filter} OR b.desc_area like ${filter}) order by a.id_area asc limit ${offset},${limit};`);
+                }
             }
             // console.log(topCluster);
             if(topCluster) {
