@@ -13,7 +13,7 @@
     "prisma:test:deploy": "dotenv -e .env.test -- prisma migrate deploy",
     "prisma:test:migrate_deploy": "npx prisma db pull && npm run prisma:dev:migrate && npm run prisma:test:deploy",
     "prebuild": "rimraf dist",
-    "build": "npm run prisma:dev:pull && npm run prisma:generate && nest build",
+    "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
