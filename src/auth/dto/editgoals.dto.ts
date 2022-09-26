@@ -9,6 +9,10 @@ export class EditGoalsDto {
 
     @IsString()
     @IsOptional()
+    issue_goals: string;
+
+    @IsString()
+    @IsOptional()
     title_goals: string;
 
     @IsString()
@@ -41,4 +45,14 @@ export class EditGoalsDto {
     @IsJSON({ message: "Indikator JSON tidak valid" })
     @IsOptional()
     indikator: JSON;
+
+    @IsNumber()
+    @IsOptional()
+    @Type(() => Number)
+    id_cluster: number;
+
+    @IsNumber()
+    @IsOptional()
+    @Type(() => Number)
+    id_area: number;
 }

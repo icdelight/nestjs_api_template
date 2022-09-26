@@ -80,4 +80,7 @@ export declare class GoalsService {
         message: string;
         data: any;
     }>;
+    downloadExcelGoal(user: tbl_users, parent_family: Number): Promise<unknown>;
+    private buildSheet;
+    private styleSheet;
 }

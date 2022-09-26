@@ -1,10 +1,11 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Req, Post, Query, UseGuards, ParseIntPipe, BadRequestException, HttpException } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Req, Post, Query, UseGuards, ParseIntPipe, BadRequestException, HttpException, Param, Head, Header, Res } from '@nestjs/common';
 import { GoalsService } from "./goals.service";
 import { tbl_users } from '@prisma/client';
 import { GetUser } from '../auth/decorator';
 import { AddGoalsDto, EditGoalsDto } from '../auth/dto';
 import { JwtGuard } from '../auth/guard';
 import { RemapsGoalDto } from 'src/auth/dto/remapgoals.dto';
+import { Response } from 'express';
 
 @UseGuards(JwtGuard)
 @Controller('goals')
@@ -90,4 +91,14 @@ export class GoalsController {
         return this.goalService.searchGoal(user,dto);
     }
 
+    @HttpCode(HttpStatus.OK)
+    @Header('Content-Type', 'text/xlsx')
+    @Get('downloadExcelGoal/:parent_family')
+    async downloadExcelGoal(@GetUser() user: tbl_users,  @Param('parent_family', ParseIntPipe) parent_family: number, @Res() res: Response) {
+    // downloadExcelGoal(@GetUser() user: tbl_users,  @Param('parent_family', ParseIntPipe) parent_family: number) {
+
+        let result =  await this.goalService.downloadExcelGoal(user,parent_family);
+        // return result;
+        res.download(result as string)
+    }
 }

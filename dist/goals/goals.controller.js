@@ -17,7 +17,6 @@ const common_1 = require("@nestjs/common");
 const goals_service_1 = require("./goals.service");
 const decorator_1 = require("../auth/decorator");
 const dto_1 = require("../auth/dto");
-const guard_1 = require("../auth/guard");
 const remapgoals_dto_1 = require("../auth/dto/remapgoals.dto");
 let GoalsController = class GoalsController {
     constructor(goalService) {
@@ -63,6 +62,10 @@ let GoalsController = class GoalsController {
     }
     searchGoal(user, dto) {
         return this.goalService.searchGoal(user, dto);
+    }
+    async downloadExcelGoal(user, parent_family, res) {
+        let result = await this.goalService.downloadExcelGoal(user, parent_family);
+        res.download(result);
     }
 };
 __decorate([
@@ -160,8 +163,18 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], GoalsController.prototype, "searchGoal", null);
+__decorate([
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Header)('Content-Type', 'text/xlsx'),
+    (0, common_1.Get)('downloadExcelGoal/:parent_family'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __param(1, (0, common_1.Param)('parent_family', common_1.ParseIntPipe)),
+    __param(2, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Number, Object]),
+    __metadata("design:returntype", Promise)
+], GoalsController.prototype, "downloadExcelGoal", null);
 GoalsController = __decorate([
-    (0, common_1.UseGuards)(guard_1.JwtGuard),
     (0, common_1.Controller)('goals'),
     __metadata("design:paramtypes", [goals_service_1.GoalsService])
 ], GoalsController);

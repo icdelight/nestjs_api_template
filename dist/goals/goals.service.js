@@ -15,6 +15,8 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const jwt_1 = require("@nestjs/jwt");
 const config_1 = require("@nestjs/config");
 const goals_repository_1 = require("./goals.repository");
+const exceljs_1 = require("exceljs");
+const tmp = require("tmp");
 function response(statusCode, message, data) {
     const response = {
         statusCode: statusCode,
@@ -55,12 +57,12 @@ function recurseTree(allGoal, parent) {
                     parentGoal[key]["status_goals"] = obj['status_goals'];
                     parentGoal[key]["progress"] = obj['progress'];
                     parentGoal[key]["parent_goals"] = obj['parent_goals'];
-                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ? JSON.parse(obj['type_goals']) : style_col;
+                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ? (obj['type_goals']) : style_col;
                     parentGoal[key]["last_modified_date"] = obj['firstName'];
                     parentGoal[key]["id_cluster"] = obj['id_cluster'] !== "" && obj['id_cluster'] !== null ? (obj['id_cluster']) : '';
                     parentGoal[key]["id_area"] = obj['id_area'] !== "" && obj['id_area'] !== null ? (obj['id_area']) : '';
                     parentGoal[key]["clustered"] = obj['clustered'] !== "" && obj['clustered'] !== null ? (obj['clustered']) : '';
-                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ? JSON.parse(obj['indikator']) : indikator;
+                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ? (obj['indikator']) : indikator;
                 }
             });
             if (allGoal[key]) {
@@ -157,6 +159,7 @@ function convertToGoalsArray(tbl_goals, kodefikasi = 'GOAL') {
         var stringID = `${element.id_goals}`;
         finalData[stringID] = {};
         finalData[stringID]["id_goals"] = element.id_goals ? element.id_goals : null;
+        finalData[stringID]["issue_goals"] = element.issue_goals ? element.issue_goals : null;
         finalData[stringID]["title_goals"] = element.title_goals ? element.title_goals : null;
         finalData[stringID]["desc_goals"] = element.desc_goals ? element.desc_goals : null;
         finalData[stringID]["parent_family"] = element.parent_family ? element.parent_family : null;
@@ -191,6 +194,7 @@ function recurseBuildTree(goals, parent, kodefikasi = 'GOAL') {
         final[(element.id_goals)]['id_goals'] = element.id_goals;
         final[(element.id_goals)]['parent_goals'] = element.parent_goals;
         final[(element.id_goals)]['parent_family'] = element.parent_family;
+        final[(element.id_goals)]['issue_goals'] = element.issue_goals;
         final[(element.id_goals)]['title'] = element.title_goals;
         final[(element.id_goals)]['subtitle'] = element.desc_goals;
         final[(element.id_goals)]['title_goals'] = element.title_goals;
@@ -524,6 +528,7 @@ let GoalsService = class GoalsService {
         console.log(dto);
         try {
             const addGoal = await this.goalRepo.createGoal({
+                issue_goals: dto.issue_goals,
                 title_goals: dto.title_goals,
                 desc_goals: dto.desc_goals,
                 pic_goals: dto.pic_goals,
@@ -534,6 +539,8 @@ let GoalsService = class GoalsService {
                 parent_goals: Number.isInteger(dto.parent_goals) ? dto.parent_goals : Number(dto.parent_goals),
                 type_goals: JSON.parse(dto.type_goals),
                 indikator: JSON.parse(dto.indikator),
+                id_area: dto.id_area,
+                id_cluster: dto.id_cluster,
             });
             finalData = addGoal;
             if (addGoal) {
@@ -745,6 +752,136 @@ let GoalsService = class GoalsService {
         }
         const result = convertToGoalsArray(searchRes);
         return response(200, "Berhasil ambil data", result.filter((el) => { return el != null; }));
+    }
+    async downloadExcelGoal(user, parent_family) {
+        if (parent_family == null || parent_family == undefined) {
+            throw new common_1.BadRequestException("Parameter download tidak valid.");
+        }
+        var filter = {
+            where: {}
+        };
+        const data = await this.goalRepo.getGoals(filter);
+        if (!data)
+            throw new common_1.NotFoundException("Tidak ditemukan data");
+        const converTed = recurseBuildTree(data, "0").filter((val) => { return val != null; });
+        let rows = [];
+        let book = new exceljs_1.Workbook();
+        let sheet = book.addWorksheet('Goals');
+        sheet.columns = [
+            { header: 'Kode', key: 'id_goals', width: 20, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'Isu Strategis', key: 'title_goals', width: 32, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'Final Outcome', key: 'desc_goals', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Kode2', key: 'id_goals', width: 20, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'CFS', key: 'title_goals', width: 32, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'KONDISI YANG DIBUTUHKAN', key: 'desc_goals', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Kode3', key: 'id_goals', width: 20, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'Menentukan Kondisi Antara', key: 'title_goals', width: 32, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'Flaging Program', key: 'desc_goals', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Kode4', key: 'id_goals', width: 20, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'MENENTUKAN KONDISI OPERASIONAL', key: 'title_goals', width: 32, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'Flaging Kegiatan', key: 'desc_goals', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Kode5', key: 'id_goals', width: 20, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'MENENTUKAN KONDISI OPERASIONAL (Sub-Keg)', key: 'title_goals', width: 32, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'Flaging Sub-Keg', key: 'desc_goals', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+        ];
+        this.buildSheet(sheet, converTed);
+        this.styleSheet(sheet);
+        let File = await new Promise((resolve, reject) => {
+            tmp.file({ discardDescriptor: true, prefix: 'GoalSheet ', postfix: '.xlsx', mode: parseInt('0600', 8) }, async (err, file) => {
+                if (err)
+                    throw new common_1.BadRequestException(err);
+                book.xlsx.writeFile(file).then(_ => {
+                    resolve(file);
+                }).catch(err => {
+                    throw new common_1.BadRequestException(err);
+                });
+            });
+        });
+        return File;
+    }
+    buildSheet(sheet, converTed) {
+        let countChild2 = 2;
+        let countChild3 = 0;
+        let countChild4 = 0;
+        let countChild5 = 0;
+        let lastCountChild = null;
+        let row = [];
+        converTed.forEach((element, index) => {
+            row[1] = element.kodefikasi;
+            row[2] = element.issue_goals;
+            row[3] = element.title_goals;
+            sheet.addRow(row);
+            countChild2 = sheet.rowCount;
+            if (element.children.length > 0) {
+                element.children.forEach(element => {
+                    sheet.getCell('D' + countChild2).value = element.kodefikasi;
+                    sheet.getCell('E' + countChild2).value = element.issue_goals;
+                    sheet.getCell('F' + countChild2).value = element.title_goals;
+                    if (element.children.length > 0) {
+                        countChild3 = countChild2;
+                        element.children.forEach(element => {
+                            sheet.getCell('G' + countChild3).value = element.kodefikasi;
+                            sheet.getCell('H' + countChild3).value = element.issue_goals;
+                            sheet.getCell('I' + countChild3).value = element.title_goals;
+                            if (element.children.length > 0) {
+                                countChild4 = countChild3;
+                                element.children.forEach(element => {
+                                    sheet.getCell('J' + countChild4).value = element.kodefikasi;
+                                    sheet.getCell('K' + countChild4).value = element.issue_goals;
+                                    sheet.getCell('L' + countChild4).value = element.title_goals;
+                                    if (element.children.length > 0) {
+                                        countChild5 = countChild4;
+                                        element.children.forEach(element => {
+                                            sheet.getCell('M' + countChild5).value = element.kodefikasi;
+                                            sheet.getCell('N' + countChild5).value = element.issue_goals;
+                                            sheet.getCell('O' + countChild5).value = element.title_goals;
+                                            if (element.children.length > 0) {
+                                            }
+                                            countChild5++;
+                                            lastCountChild = countChild5;
+                                        });
+                                    }
+                                    countChild4++;
+                                    lastCountChild = countChild4;
+                                });
+                            }
+                            countChild3++;
+                            lastCountChild = countChild3;
+                        });
+                    }
+                    lastCountChild = countChild2;
+                    countChild2 = sheet.rowCount + 1;
+                });
+            }
+            else {
+                lastCountChild = countChild2;
+            }
+            console.log('lastRow', sheet.rowCount);
+            let styleBorder = sheet.getRow(lastCountChild);
+            for (let index = 1; index < 16; index++) {
+                styleBorder.getCell(index).border = {
+                    bottom: { style: 'medium', color: { argb: '000000' } },
+                };
+            }
+            for (let index = 1; index <= lastCountChild; index++) {
+                sheet.getCell('P' + index).border = {
+                    left: { style: 'medium', color: { argb: '000000' } }
+                };
+            }
+        });
+    }
+    styleSheet(sheet) {
+        sheet.getRow(1).eachCell((cell) => {
+            cell.font = { size: 11.5, bold: true, color: { argb: 'FFFFFF' } };
+            cell.fill = { type: 'pattern', pattern: 'solid', bgColor: { argb: '000000' }, fgColor: { argb: '000000' } };
+            cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+            cell.border = {
+                top: { style: 'thin', color: { argb: '000000' } },
+                left: { style: 'thin', color: { argb: 'FFFFFF' } },
+                bottom: { style: 'thin', color: { argb: '000000' } },
+                right: { style: 'thin', color: { argb: 'FFFFFF' } },
+            };
+        });
     }
 };
 GoalsService = __decorate([
