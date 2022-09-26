@@ -859,7 +859,7 @@ export class GoalsService {
         var filter : any = {
             where : {}
         }
-        // filter.where.parent_family = parent_family
+        if(parent_family != 0) filter.where.parent_family = parent_family
         const data = await this.goalRepo.getGoals(filter);
         if(!data) throw new NotFoundException("Tidak ditemukan data");
         const converTed = recurseBuildTree(data,"0").filter((val) => { return val != null});
@@ -1006,11 +1006,5 @@ export class GoalsService {
                 right : { style :'thin', color: { argb: 'FFFFFF'}},
             }
         })
-
-        // sheet.eachRow((row) => {
-        //     row.border = {
-        //         bottom : { style :'thin', color: { argb: '000000'}},
-        //     }
-        // })
     }
 }

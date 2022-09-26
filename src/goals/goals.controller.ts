@@ -7,7 +7,7 @@ import { JwtGuard } from '../auth/guard';
 import { RemapsGoalDto } from 'src/auth/dto/remapgoals.dto';
 import { Response } from 'express';
 
-// @UseGuards(JwtGuard)
+@UseGuards(JwtGuard)
 @Controller('goals')
 export class GoalsController {
     constructor(private goalService: GoalsService) {}
