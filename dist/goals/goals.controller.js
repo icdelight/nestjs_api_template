@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const goals_service_1 = require("./goals.service");
 const decorator_1 = require("../auth/decorator");
 const dto_1 = require("../auth/dto");
+const guard_1 = require("../auth/guard");
 const remapgoals_dto_1 = require("../auth/dto/remapgoals.dto");
 let GoalsController = class GoalsController {
     constructor(goalService) {
@@ -175,6 +176,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], GoalsController.prototype, "downloadExcelGoal", null);
 GoalsController = __decorate([
+    (0, common_1.UseGuards)(guard_1.JwtGuard),
     (0, common_1.Controller)('goals'),
     __metadata("design:paramtypes", [goals_service_1.GoalsService])
 ], GoalsController);

@@ -60,9 +60,10 @@ model tbl_goals {
   last_modified_date DateTime? @default(now()) @db.DateTime(0)
   indikator          Json?   
   id_area            Int?
-  id_cluster         Int?
   kodefikasi         String?   @db.VarChar(255)
   parent_family      Int?
+  tbl_cluster        tbl_cluster? @relation(fields:[id_cluster], references:[id_cluster])
+  id_cluster         Int?
 
   @@map("goals")
 }
@@ -84,6 +85,6 @@ model tbl_cluster {
   createdAt    DateTime? @db.DateTime(0)
   modifiedAt   DateTime? @default(now()) @db.DateTime(0)
   id_sub_areas String?   @db.LongText
-
+  tbl_goals    tbl_goals[]
   @@map("cluster")
 }

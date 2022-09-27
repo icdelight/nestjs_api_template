@@ -201,6 +201,7 @@ function convertToGoalsArray(tbl_goals, kodefikasi = 'GOAL')
         finalData[stringID]["kodefikasi"] = kodefikasi+ '-' + element.id_goals;
         finalData[stringID]['id_area'] = element.id_area;
         finalData[stringID]['id_cluster'] = element.id_cluster;
+        finalData[stringID]['nama_cluster'] = element.tbl_cluster != null && element.tbl_cluster.nama_cluster != null ? element.tbl_cluster.nama_cluster : null;
         finalData[stringID]["children"] = []
         resData[stringID] = finalData[stringID]
         finalData = {}
@@ -236,6 +237,7 @@ function recurseBuildTree(goals, parent, kodefikasi = 'GOAL')
         final[(element.id_goals)]['type_goals'] = element.type_goals;
         final[(element.id_goals)]['id_area'] = element.id_area;
         final[(element.id_goals)]['id_cluster'] = element.id_cluster;
+        final[(element.id_goals)]['nama_cluster'] = element.tbl_cluster != null && element.tbl_cluster.nama_cluster != null ? element.tbl_cluster.nama_cluster : null;
         final[(element.id_goals)]['kodefikasi'] = kodefikasi+ '-' + element.id_goals.toString();
         final[(element.id_goals)]['children'] = recurseBuildTree(goals,nextParent, kodefikasi+ '-' + element.id_goals.toString());
     });
@@ -809,7 +811,7 @@ export class GoalsService {
         return tbl_goals;
     }
     async treeGoal(user: tbl_users, parent_family, id_goals) {
-        const getGoal = await this.goalRepo.getGoals({where : {id_goals : id_goals}})
+        const getGoal = await this.goalRepo.getGoals({where : {id_goals : id_goals},include: { tbl_cluster : { select : { nama_cluster: true}}}})
         let parent_goal = convertToGoalsArray(getGoal)
         const param = {
             where : {
@@ -817,9 +819,17 @@ export class GoalsService {
             },
             orderBy : {
                 parent_goals : 'asc'
+            },
+            include: {
+                tbl_cluster: {
+                    select: {
+                        nama_cluster: true
+                    }
+                }
             }
         }
         const tbl_goals = await this.goalRepo.getGoals(param)
+        // console.log('tbl_goals', tbl_goals);
         if(!tbl_goals || tbl_goals.length <= 0)
         {
             throw new NotFoundException("Data Tidak ditemukan");
