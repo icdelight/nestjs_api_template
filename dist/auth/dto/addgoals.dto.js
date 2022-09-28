@@ -61,14 +61,16 @@ __decorate([
     __metadata("design:type", Number)
 ], AddGoalsDto.prototype, "parent_goals", void 0);
 __decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsNotEmpty)({ message: "$property kosong." }),
+    (0, class_validator_1.IsNotEmpty)({ message: "Nilai $property tidak valid." }),
     (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], AddGoalsDto.prototype, "id_area", void 0);
 __decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsNotEmpty)({ message: "$property kosong." }),
+    (0, class_validator_1.IsNotEmpty)({ message: "Nilai $property tidak valid." }),
     (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], AddGoalsDto.prototype, "id_cluster", void 0);
