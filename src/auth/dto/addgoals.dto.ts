@@ -44,8 +44,8 @@ export class AddGoalsDto {
     @Type(() => Number)
     id_area: number;
 
-    @IsNumber()
-    @IsNotEmpty({message : "$property kosong."})
+    // @IsNumber()
+    // @IsNotEmpty({message : "$property kosong."})
     @Type(() => Number)
     id_cluster: number;
 }
