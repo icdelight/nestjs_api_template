@@ -437,7 +437,7 @@ export class GoalsService {
         let resTree = [];
         let idxClust = [];
         try {
-            clustGoal = await this.prisma.$queryRaw`SELECT *,'1' as clustered FROM goals WHERE id_cluster = ${dto.id_cluster} AND parent_family = ${dto.parent_family} ORDER BY parent_goals asc;`;
+            clustGoal = await this.prisma.$queryRaw`SELECT *,'1' as clustered FROM goals WHERE id_cluster = ${dto.id_cluster} AND parent_family = ${dto.parent_family} AND status_goals = 1 ORDER BY parent_goals asc;`;
             // clustGoal = await this.prisma.tbl_goals.findMany({
             //     select:{
             //         id_goals: true,
@@ -461,7 +461,7 @@ export class GoalsService {
             //         parent_goals: 'asc',
             //     }
             // });
-            topGoal = await this.prisma.$queryRaw`SELECT *,'1' as clustered FROM goals WHERE parent_family = ${dto.parent_family} ORDER BY parent_goals asc;`;
+            topGoal = await this.prisma.$queryRaw`SELECT *,'1' as clustered FROM goals WHERE parent_family = ${dto.parent_family} AND status_goals = 1 ORDER BY parent_goals asc;`;
             // topGoal = await this.prisma.tbl_goals.findMany({
             //     select:{
             //         id_goals: true,
@@ -834,6 +834,35 @@ export class GoalsService {
         return tbl_goals;
     }
     async treeGoal(user: tbl_users, parent_family, id_goals) {
+        const getGoal = await this.goalRepo.getGoals({where : {id_goals : id_goals},include: { tbl_cluster : { select : { nama_cluster: true}}}})
+        let parent_goal = convertToGoalsArray(getGoal)
+        const param = {
+            where : {
+                parent_family: parent_family,
+                status_goals: 1,
+            },
+            orderBy : {
+                parent_goals : 'asc'
+            },
+            include: {
+                tbl_cluster: {
+                    select: {
+                        nama_cluster: true
+                    }
+                }
+            }
+        }
+        const tbl_goals = await this.goalRepo.getGoals(param)
+        // console.log('tbl_goals', tbl_goals);
+        if(!tbl_goals || tbl_goals.length <= 0)
+        {
+            throw new NotFoundException("Data Tidak ditemukan");
+        }
+        let final = recurseBuildTree(tbl_goals, id_goals);
+        parent_goal[id_goals]['children'] = final;
+        return response(200, "Berhasil ambil data", parent_goal.filter((el) => { return el != null; }));
+    }
+    async treeGoalAdmin(user: tbl_users, parent_family, id_goals) {
         const getGoal = await this.goalRepo.getGoals({where : {id_goals : id_goals},include: { tbl_cluster : { select : { nama_cluster: true}}}})
         let parent_goal = convertToGoalsArray(getGoal)
         const param = {

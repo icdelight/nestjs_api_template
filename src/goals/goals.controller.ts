@@ -92,6 +92,16 @@ export class GoalsController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Post('treegoalsadmin')
+    treeGoalsAdmin(@GetUser() user: tbl_users, @Body() dto: any) {
+        if(dto.parent_family == undefined || dto.parent_family == null) throw new BadRequestException("Parent Family belum didefinisikan")
+        if (dto.id_goals == undefined || dto.id_goals == null) throw new BadRequestException("ID Goals belum didefinisikan")
+        var parent_family = parseInt(dto.parent_family);
+        var id_goals = parseInt(dto.id_goals);
+        return this.goalService.treeGoalAdmin(user,parent_family, id_goals);
+    }
+
+    @HttpCode(HttpStatus.OK)
     @Post('searchgoals')
     searchGoal(@GetUser() user: tbl_users,  @Body() dto: any) {
         return this.goalService.searchGoal(user,dto);
