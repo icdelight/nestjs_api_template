@@ -142,7 +142,7 @@ function recurseCluster(newObj,allGoal,obj,idxClust) {
             if(!newObj[objPar].hasOwnProperty(obj)) {
                 newObj[objPar][obj] = allGoal[objPar][obj];
                 // console.log(objPar,Object.keys(newObj[objPar]));
-                // console.log(newObj['1']['3']);
+                // console.log(newObj['11']['15']);
                 resObj = Object.entries(newObj);
                 const sorted = Object.keys(newObj)
                 .sort()
@@ -159,7 +159,7 @@ function recurseCluster(newObj,allGoal,obj,idxClust) {
                 // });
                 // console.log(resObj);
                 newObj = sorted;
-                // console.log(sorted['1']['3']);
+                // console.log(sorted);
                 // console.log(idxClust);
                 // console.log(objPar,idxClust.includes(objPar));
                 if(!idxClust.includes(`${objPar}_${obj}`)) {
@@ -504,12 +504,13 @@ export class GoalsService {
                 });
     
                 let newObj = allGoalClust;
-                console.log('all',allGoalClust);
+                // console.log('all',allGoalClust);
                 for(let obj in allGoalClust) {
                     // console.log('find parent',obj);
-                    recurseCluster(newObj,allGoal,obj,idxClust);
+                    newObj = recurseCluster(newObj,allGoal,obj,idxClust);
                 }
-                console.log('cluster',newObj);
+                // console.log('idxcluster',idxClust);
+                // console.log('cluster',newObj);
                 let obj = [];
                 parent_id = 0;
                 let parentGoal = {};
