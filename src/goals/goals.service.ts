@@ -427,9 +427,9 @@ export class GoalsService {
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
-        if(user.role != "1" && user.role != "2" ) {
-            throw new ForbiddenException('You dont have privileges.');
-        }
+        // if(user.role != "1" && user.role != "2" ) {
+        //     throw new ForbiddenException('You dont have privileges.');
+        // }
         let allGoal = {};
         let allGoalClust = {};
         let topGoal = null;
@@ -934,7 +934,6 @@ export class GoalsService {
         const result = convertToGoalsArray(searchRes);
         return response(200,"Berhasil ambil data",result.filter((el) => { return el != null}));
     }
-    
     async downloadExcelGoal(user:tbl_users, parent_family: Number) {
         if(parent_family == null || parent_family == undefined) {
             throw new BadRequestException("Parameter download tidak valid.")
@@ -983,7 +982,6 @@ export class GoalsService {
         })
         return File;
     }
-
     private buildSheet(sheet: Worksheet, converTed)
     {
         let countChild2 = 2;
@@ -1072,7 +1070,6 @@ export class GoalsService {
             }
         });
     }
-
     private styleSheet(sheet: Worksheet)
     {
         sheet.getRow(1).eachCell((cell) => {
