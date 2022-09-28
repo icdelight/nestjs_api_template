@@ -91,7 +91,7 @@ export class ClusterServices{
         //     throw new ForbiddenException('You dont have privileges.');
         // }
         let where = "";
-        if(user.role == "2") {
+        if(user.role != "1") {
             where = `WHERE a.id_area = ${user.id_area} `;
         }
         let topCluster = [];
