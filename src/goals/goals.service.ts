@@ -505,12 +505,12 @@ export class GoalsService {
                 });
     
                 let newObj = allGoalClust;
-                // console.log('all',allGoalClust);
+                console.log('all',allGoalClust);
                 for(let obj in allGoalClust) {
                     // console.log('find parent',obj);
                     recurseCluster(newObj,allGoal,obj,idxClust);
                 }
-                // console.log('cluster',newObj);
+                console.log('cluster',newObj);
                 let obj = [];
                 parent_id = 0;
                 let parentGoal = {};
