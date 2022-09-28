@@ -774,6 +774,20 @@ export class GoalsService {
     async initialGoals(user: tbl_users) {
         const tbl_goals = await this.prisma.tbl_goals.findMany({
             where : {
+                parent_goals : 0,
+                status_goals : 1,
+            }
+        });
+        if(!tbl_goals || tbl_goals.length <= 0)
+        {
+            throw new NotFoundException("Data Tidak ditemukan");
+        }
+        let finalResult = convertToGoalsArray(tbl_goals);
+        return response(200,"Berhasil ambil data",finalResult.filter((el) => {return el != null}));
+    }
+    async initialGoalsAdmin(user: tbl_users) {
+        const tbl_goals = await this.prisma.tbl_goals.findMany({
+            where : {
                 parent_goals : 0
             }
         });
