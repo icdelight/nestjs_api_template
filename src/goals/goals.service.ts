@@ -679,7 +679,10 @@ export class GoalsService {
     async editgoal(user: tbl_users, dto: any) {
         let statusCode = 999;
         let message = "Something went wrong.";
-        if(user.role != "1") {
+        if(user.role != "1" && user.role != "2") {
+            throw new ForbiddenException('You dont have privileges.');
+        }
+        if(user.role == "2" && (user.id_area != dto.id_area)) {
             throw new ForbiddenException('You dont have privileges.');
         }
         let editGoal = null;
@@ -702,7 +705,10 @@ export class GoalsService {
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
-        if(user.role != "1") {
+        if(user.role != "1" && user.role != "2") {
+            throw new ForbiddenException('You dont have privileges.');
+        }
+        if(user.role == "2" && (user.id_area != dto.id_area)) {
             throw new ForbiddenException('You dont have privileges.');
         }
         let editGoal = null;
