@@ -87,9 +87,9 @@ export class ClusterServices{
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
-        if(user.role != "1" && user.role != "2") {
-            throw new ForbiddenException('You dont have privileges.');
-        }
+        // if(user.role != "1" && user.role != "2") {
+        //     throw new ForbiddenException('You dont have privileges.');
+        // }
         let where = "";
         if(user.role == "2") {
             where = `WHERE a.id_area = ${user.id_area} `;
