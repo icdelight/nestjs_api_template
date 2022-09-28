@@ -772,12 +772,23 @@ export class GoalsService {
         return response(statusCode,message,delGoal);
     }
     async initialGoals(user: tbl_users) {
-        const tbl_goals = await this.prisma.tbl_goals.findMany({
+        let tbl_goals = null;
+        if(user.role == '1') {
+            tbl_goals = await this.prisma.tbl_goals.findMany({
+                where : {
+                    parent_goals : 0,
+                    status_goals : 1,
+                }
+            });
+        }else{
+            tbl_goals = await this.prisma.tbl_goals.findMany({
             where : {
                 parent_goals : 0,
                 status_goals : 1,
+                id_area: user.id_area,
             }
         });
+        }
         if(!tbl_goals || tbl_goals.length <= 0)
         {
             throw new NotFoundException("Data Tidak ditemukan");
@@ -786,11 +797,21 @@ export class GoalsService {
         return response(200,"Berhasil ambil data",finalResult.filter((el) => {return el != null}));
     }
     async initialGoalsAdmin(user: tbl_users) {
-        const tbl_goals = await this.prisma.tbl_goals.findMany({
-            where : {
-                parent_goals : 0
-            }
-        });
+        let tbl_goals = null;
+        if(user.role == '1') {
+            tbl_goals = await this.prisma.tbl_goals.findMany({
+                where : {
+                    parent_goals : 0,
+                }
+            });
+        }else {
+            tbl_goals = await this.prisma.tbl_goals.findMany({
+                where : {
+                    parent_goals : 0,
+                    id_area: user.id_area,
+                }
+            });
+        }
         if(!tbl_goals || tbl_goals.length <= 0)
         {
             throw new NotFoundException("Data Tidak ditemukan");
