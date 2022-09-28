@@ -53,12 +53,12 @@ function recurseTree(allGoal,parent) {
                     parentGoal[key]["status_goals"] = obj['status_goals'];
                     parentGoal[key]["progress"] = obj['progress'];
                     parentGoal[key]["parent_goals"] = obj['parent_goals'];
-                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ?JSON.parse(obj['type_goals']):style_col;
+                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ?(obj['type_goals']):style_col;
                     parentGoal[key]["last_modified_date"] = obj['firstName'];
                     parentGoal[key]["id_cluster"] = obj['id_cluster'] !== "" && obj['id_cluster'] !== null ?(obj['id_cluster']):'';
                     parentGoal[key]["id_area"] = obj['id_area'] !== "" && obj['id_area'] !== null ?(obj['id_area']):'';
                     parentGoal[key]["clustered"] = obj['clustered'] !== "" && obj['clustered'] !== null ?(obj['clustered']):'';
-                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?JSON.parse(obj['indikator']):indikator;
+                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?(obj['indikator']):indikator;
                 }
             });
 
@@ -107,12 +107,12 @@ function recurseTreeAdmin(allGoal,parent) {
                     parentGoal[key]["status_goals"] = obj['status_goals'];
                     parentGoal[key]["progress"] = obj['progress'];
                     parentGoal[key]["parent"] = obj['parent'];
-                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ? JSON.parse(obj['type_goals']):style_col;
+                    parentGoal[key]["type_goals"] = obj['type_goals'] !== "" && obj['type_goals'] !== null ? (obj['type_goals']):style_col;
                     parentGoal[key]["last_modified_date"] = obj['last_modified_date'];
                     parentGoal[key]["firstName"] = obj['name'];
                     parentGoal[key]["id_cluster"] = obj['id_cluster'] !== "" && obj['id_cluster'] !== null ?(obj['id_cluster']):'';
                     parentGoal[key]["id_area"] = obj['id_area'] !== "" && obj['id_area'] !== null ?(obj['id_area']):'';
-                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ? JSON.parse(obj['indikator']):indikator;
+                    parentGoal[key]["indikator"] = obj['indikator'] !== "" && obj['indikator'] !== null ?(obj['indikator']):indikator;
                 }
             });
 
