@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import {IsDate, IsJSON, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import {IsDate, IsJSON, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class AddGoalsDto {
     @IsString()
@@ -39,13 +39,15 @@ export class AddGoalsDto {
     @Type(() => Number)
     parent_goals: number;
 
+    @IsOptional()
     @IsNumber()
-    @IsNotEmpty({message : "$property kosong."})
+    @IsNotEmpty({message : "Nilai $property tidak valid."})
     @Type(() => Number)
     id_area: number;
 
-    // @IsNumber()
-    // @IsNotEmpty({message : "$property kosong."})
+    @IsOptional()
+    @IsNumber()
+    @IsNotEmpty({message : "Nilai $property tidak valid."})
     @Type(() => Number)
     id_cluster: number;
 }
