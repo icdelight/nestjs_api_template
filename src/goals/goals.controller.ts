@@ -25,6 +25,12 @@ export class GoalsController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Get('initialgoalsadmin')
+    initialGoalsAdmin(@GetUser() user: tbl_users) {
+        return this.goalService.initialGoalsAdmin(user);
+    }
+
+    @HttpCode(HttpStatus.OK)
     @Post('childgoals')
     childGoals(@GetUser() user: tbl_users, @Body('parent_goals', ParseIntPipe) parent_goals: number) {
         return this.goalService.childGoals(user,parent_goals);
