@@ -708,19 +708,23 @@ export class GoalsService {
         if(user.role != "1" && user.role != "2") {
             throw new ForbiddenException('You dont have privileges.');
         }
-        if(user.role == "2" && (user.id_area != dto.id_area)) {
-            throw new ForbiddenException('You dont have privileges.');
-        }
+        // if(user.role == "2" && (user.id_area != dto.id_area)) {
+        //     throw new ForbiddenException('You dont have privileges.');
+        // }
         let editGoal = null;
         const newMap = JSON.parse(dto.NewMap);
-        // console.log(newMap);
+        console.log(newMap);
         try {
-            // for (const queryKey of Object.keys(newMap)) {
-            //     const obj = newMap[queryKey];
-            //     if(obj.parent_goals == '0' && obj.id_goals != '1') {
-            //         throw new BadRequestException('Parent node is cannot more than one');
-            //     }
-            // }
+            let p = 0;
+            for (const queryKey of Object.keys(newMap)) {
+                const obj = newMap[queryKey];
+                if(obj.parent_goals == '0') {
+                    p++;
+                }
+            }
+            if(p > 1) {
+                throw new BadRequestException('Parent node is cannot more than one');
+            }
             for (const queryKey of Object.keys(newMap)) {
                 // console.log(queryKey,`${dto.NewMap[queryKey]}`);
                 const obj = newMap[queryKey];
