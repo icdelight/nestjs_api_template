@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, InternalServerErro
 import { PrismaService } from "../prisma/prisma.service";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
-import { tbl_goals, tbl_users } from '@prisma/client';
+import { Prisma, tbl_goals, tbl_users } from '@prisma/client';
 import { GoalRepository } from "./goals.repository";
 
 import { Workbook, Worksheet } from "exceljs";
@@ -687,7 +687,30 @@ export class GoalsService {
         }
         let editGoal = null;
         try {
-            editGoal = await this.goalRepo.updateGoals(dto.id_goals, dto);
+            if(isNaN(dto.id_cluster)) {
+                editGoal = await this.prisma.$queryRaw`UPDATE goals SET id_cluster=${dto.id_cluster} WHERE id_goals=${dto.id_goals}`;
+                editGoal = await this.prisma.tbl_goals.updateMany({
+                    data:{
+                        title_goals: dto.title_goals,
+                        desc_goals: dto.desc_goals,
+                        pic_goals: dto.pic_goals,
+                        start_date: dto.start_date,
+                        due_date: dto.due_date,
+                        status_goals: dto.status_goals,
+                        type_goals: dto.type_goals,
+                        indikator: dto.indikator,
+                        id_area: dto.id_area,
+                        issue_goals: dto.issue_goals,
+                    },
+                    where:{
+                        id_goals: dto.id_goals,
+                    }
+                });
+            }else{
+                editGoal = await this.goalRepo.updateGoals(dto.id_goals, dto);
+
+            }
+            
             if(editGoal) {
                 statusCode = 200;
                 message = "Success Edit Goals.";
@@ -696,6 +719,7 @@ export class GoalsService {
                 message = "Failed Edit Goals.";
             }
         } catch (error) {
+            console.log(error);
             message = this.config.get('APP_DEBUG') == "true" ? error.message : message
             throw new NotImplementedException(message)
         }
@@ -713,7 +737,7 @@ export class GoalsService {
         // }
         let editGoal = null;
         const newMap = JSON.parse(dto.NewMap);
-        console.log(newMap);
+        // console.log(newMap);
         try {
             let p = 0;
             for (const queryKey of Object.keys(newMap)) {

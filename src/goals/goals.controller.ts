@@ -65,7 +65,6 @@ export class GoalsController {
     @Post('editgoals')
     editGoals(@GetUser() user: tbl_users,  @Body() dto: EditGoalsDto) {
         // console.log(dto);
-        // console.log(dto);
         // return true;
         /** JSON String to JSON object */
         dto.type_goals = JSON.parse(dto.type_goals.toString())
@@ -78,6 +77,7 @@ export class GoalsController {
     @Post('remapgoals')
     remapGoals(@GetUser() user: tbl_users,  @Body() dto: RemapsGoalDto) {
         // if(dto.NewMap == undefined || dto.NewMap == null) throw new BadRequestException("Data belum didefiniskan")
+        // console.log(dto);
         return this.goalService.remapgoal(user,dto);
     }
 

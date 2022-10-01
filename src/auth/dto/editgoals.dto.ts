@@ -46,7 +46,6 @@ export class EditGoalsDto {
     @IsOptional()
     indikator: JSON;
 
-    @IsNumber()
     @IsOptional()
     @Type(() => Number)
     id_cluster: number;
