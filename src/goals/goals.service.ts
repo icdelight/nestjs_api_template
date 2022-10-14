@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, NotImplementedException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotAcceptableException, NotFoundException, NotImplementedException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
@@ -801,6 +801,9 @@ export class GoalsService {
     }
     async initialGoals(user: tbl_users) {
         let tbl_goals = null;
+        if(user.id_area == null || user.id_area == undefined) {
+            throw new NotAcceptableException("Mohon menghubungi admin untuk config user anda.");
+        }
         if(user.role == '1') {
             tbl_goals = await this.prisma.tbl_goals.findMany({
                 where : {
@@ -817,6 +820,7 @@ export class GoalsService {
             }
         });
         }
+        // console.log(user);
         if(!tbl_goals || tbl_goals.length <= 0)
         {
             throw new NotFoundException("Data Tidak ditemukan");
@@ -1115,4 +1119,88 @@ export class GoalsService {
             }
         })
     }
+    async getStats(user: tbl_users) {
+        let statusCode = 999;
+        let message = "Something went wrong.";
+        let data = null;
+        // if(user.role != "1" && user.role != "2" ) {
+        //     throw new ForbiddenException('You dont have privileges.');
+        // }
+        let Goals = null;
+        let resData = {};
+        try {
+            if(user.role == "1") {
+                Goals = await this.prisma.$queryRaw`SELECT id_goals,parent_goals,parent_family,id_cluster,indikator FROM goals ORDER BY parent_family,parent_goals;`;
+            }else{
+                Goals = await this.prisma.$queryRaw`SELECT id_goals,parent_goals,parent_family,id_cluster,indikator FROM goals WHERE id_area = ${user.id_area} ORDER BY parent_family,parent_goals;`;
+            }
+            let parent = 0;
+            let child = 0;
+            let clust = 0;
+            let ind = 0;
+            if(Goals && Goals.length > 0) {
+                Goals.forEach(element => {
+                    if(element !== null) {
+                        if(element.parent_goals == 0) {
+                            parent++;
+                        }else {
+                            child++;
+                        }
+                        if(element.id_cluster != null) {
+                            clust++;
+                        }
+                        // console.log(element.indikator.length);
+                        if(element.indikator.length > 2) {
+                            ind++;
+                        }
+                    }
+                });
+                statusCode = 200;
+                message = "Success Inquiry Stats.";
+                resData = {
+                    goals : parent,
+                    sub_goals : child,
+                    cluster_goals : clust,
+                    indikator_goals : ind,
+                };
+            }
+        }catch(error) {
+            console.log(error);
+            throw new InternalServerErrorException(error);
+        }
+        return response(statusCode,message,resData);
+    }
+    async getLastModifiedGoals(user: tbl_users) {
+        let statusCode = 999;
+        let message = "Something went wrong.";
+        let data = null;
+        // if(user.role != "1" && user.role != "2" ) {
+        //     throw new ForbiddenException('You dont have privileges.');
+        // }
+        let Goals = null;
+        let resData = {};
+        const perPage = 5;
+        let offset = 0;
+        let limit = offset + perPage;
+        try {
+            if(user.role == "1") {
+                Goals = await this.prisma.$queryRaw`SELECT id_goals,title_goals,desc_goals,pic_goals,parent_goals,parent_family,id_cluster,indikator,last_modified_date FROM goals ORDER BY last_modified_date desc limit ${offset},${limit};`;
+            }else{
+                Goals = await this.prisma.$queryRaw`SELECT id_goals,title_goals,desc_goals,pic_goals,parent_goals,parent_family,id_cluster,indikator,last_modified_date FROM goals WHERE id_area = ${user.id_area} ORDER BY last_modified_date desc limit ${offset},${limit};`;
+            }
+            if(Goals && Goals.length > 0) {
+                statusCode = 200;
+                message = "Success Inquiry Last Goals.";
+                resData = Goals;
+            }else{
+                statusCode = 0;
+                message = "Failled Inquiry Last Goals.";
+            }
+        }catch(error) {
+            console.log(error);
+            throw new InternalServerErrorException(error);
+        }
+        return response(statusCode,message,resData);
+    }
+
 }

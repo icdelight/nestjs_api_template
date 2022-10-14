@@ -108,6 +108,18 @@ export class GoalsController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Get('getstats')
+    getStats(@GetUser() user: tbl_users) {
+        return this.goalService.getStats(user);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('getlastmodifgoals')
+    getModGoals(@GetUser() user: tbl_users) {
+        return this.goalService.getLastModifiedGoals(user);
+    }
+
+    @HttpCode(HttpStatus.OK)
     @Header('Content-Type', 'text/xlsx')
     @Get('downloadExcelGoal/:parent_family')
     async downloadExcelGoal(@GetUser() user: tbl_users,  @Param('parent_family', ParseIntPipe) parent_family: number, @Res() res: Response) {
