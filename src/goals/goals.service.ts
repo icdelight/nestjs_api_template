@@ -1019,6 +1019,65 @@ export class GoalsService {
         })
         return File;
     }
+    async downloadCsvGoal(user:tbl_users, parent_family: Number) {
+        if(parent_family == null || parent_family == undefined) {
+            throw new BadRequestException("Parameter download tidak valid.")
+        }
+        var filter : any = {
+            where : {}
+        }
+        if(parent_family != 0) filter.where.parent_family = parent_family
+        const data = await this.goalRepo.getGoals(filter);
+        if(!data) throw new NotFoundException("Tidak ditemukan data");
+        const converTed = recurseBuildTree(data,"0").filter((val) => { return val != null});
+        // console.log('converTed', converTed);
+        // return converTed;
+        // const CsvParser = require("json2csv").Parser;
+        // const csvFields = ["Kode", "Isu Strategis", "Final Outcome", "Indikator Strategis"];
+        // const csvParser = new CsvParser({ csvFields });
+        // const csvData = csvParser.parse(converTed);
+        // return csvData;
+        let rows = []
+        let book =  new Workbook();
+        let sheet = book.addWorksheet('Goals');
+        
+        sheet.columns = [
+            { header: 'Kode', key: 'id_goals', width: 20, style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}} },
+            { header: 'Isu Strategis', key: 'title_goals', width: 32 , style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}}},
+            { header: 'Final Outcome', key: 'desc_goals', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
+            { header: 'Indikator Strategis', key: 'indikator', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
+            { header: 'Kode2', key: 'id_goals', width: 20, style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}} },
+            { header: 'CFS', key: 'title_goals', width: 32 , style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}}},
+            { header: 'KONDISI YANG DIBUTUHKAN', key: 'desc_goals', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
+            { header: 'Indikator CSF', key: 'indikator', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
+            { header: 'Kode3', key: 'id_goals', width: 20, style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}} },
+            { header: 'Menentukan Kondisi Antara', key: 'title_goals', width: 32 , style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}}},
+            { header: 'Flaging Program', key: 'desc_goals', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
+            { header: 'Indikator Program', key: 'indikator', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
+            { header: 'Kode4', key: 'id_goals', width: 20, style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}} },
+            { header: 'MENENTUKAN KONDISI OPERASIONAL', key: 'title_goals', width: 32 , style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}}},
+            { header: 'Flaging Kegiatan', key: 'desc_goals', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
+            { header: 'Indikator Kegiatan', key: 'indikator', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
+            { header: 'Kode5', key: 'id_goals', width: 20, style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}} },
+            { header: 'MENENTUKAN KONDISI OPERASIONAL (Sub-Keg)', key: 'title_goals', width: 32 , style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}}},
+            { header: 'Flaging Sub-Keg', key: 'desc_goals', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
+            { header: 'Indikator Sub-Keg', key: 'indikator', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
+        ];
+        this.buildSheet(sheet, converTed)
+        this.styleSheet(sheet)
+        let File = await new Promise((resolve, reject) => { 
+            tmp.file({ discardDescriptor: true, prefix: 'GoalSheet ', postfix: '.csv', mode: parseInt('0600', 8)},async (err, file) => {
+                if(err) throw new BadRequestException(err);
+                book.csv.writeFile(file).then(_ => {
+                    resolve(file)
+                }).catch( err => {
+                    throw new BadRequestException(err)
+                })
+            })
+        })
+        return File;
+        
+    }
     private buildSheet(sheet: Worksheet, converTed)
     {
         let countChild2 = 2;
@@ -1027,49 +1086,58 @@ export class GoalsService {
         let countChild5 = 0;
         let lastCountChild = null
         let row = []
+        let ind = "";
         converTed.forEach((element,index) => {
-            row[1] = element.kodefikasi
-            row[2] = element.issue_goals
-            row[3] = element.title_goals
+            row[1] = element.kodefikasi;
+            row[2] = element.issue_goals;
+            row[3] = element.title_goals;
+            // ind = JSON.parse(element.indikator);
+            ind = element.indikator.map(ind => ind.indikator).join("\n");
+            // console.log('indikator',element.indikator.map(ind => ind.indikator).join(','));
+            row[4] = ind;
             sheet.addRow(row) /** Parent */
             countChild2 = sheet.rowCount
             if(element.children.length > 0)
             {   
                 element.children.forEach(element => {
-                    sheet.getCell('D' + countChild2).value = element.kodefikasi
+                    sheet.getCell('E' + countChild2).value = element.kodefikasi
                     // sheet.getCell('D' + countChild2).alignment = { vertical: 'middle', horizontal: 'center', wrapText : true}
-                    sheet.getCell('E' + countChild2).value = element.issue_goals
+                    sheet.getCell('F' + countChild2).value = element.issue_goals
                     // sheet.getCell('E' + countChild2).alignment = { vertical: 'middle', horizontal: 'center', wrapText : true}
-                    sheet.getCell('F' + countChild2).value = element.title_goals
+                    sheet.getCell('G' + countChild2).value = element.title_goals
                     // sheet.getCell('F' + countChild2).alignment = { vertical: 'middle', horizontal: 'center', wrapText : true}
+                    sheet.getCell('H' + countChild2).value = element.indikator.map(ind => ind.indikator).join("\n")
                     if(element.children.length > 0)
                     {   countChild3 = countChild2
                         element.children.forEach(element => {
-                            sheet.getCell('G' + countChild3).value = element.kodefikasi
+                            sheet.getCell('I' + countChild3).value = element.kodefikasi
                             // sheet.getCell('G' + countChild3).alignment = { vertical: 'middle', horizontal: 'center', wrapText : true}
-                            sheet.getCell('H' + countChild3).value = element.issue_goals
+                            sheet.getCell('J' + countChild3).value = element.issue_goals
                             // sheet.getCell('H' + countChild3).alignment = { vertical: 'middle', horizontal: 'center', wrapText : true}
-                            sheet.getCell('I' + countChild3).value = element.title_goals
+                            sheet.getCell('K' + countChild3).value = element.title_goals
                             // sheet.getCell('I' + countChild3).alignment = { vertical: 'middle', horizontal: 'center', wrapText : true}
+                            sheet.getCell('L' + countChild3).value = element.indikator.map(ind => ind.indikator).join("\n")
                             if(element.children.length > 0)
                             {
                                 countChild4 = countChild3
                                 element.children.forEach(element => {
-                                    sheet.getCell('J' + countChild4).value = element.kodefikasi
+                                    sheet.getCell('M' + countChild4).value = element.kodefikasi
                                     // sheet.getCell('J' + countChild4).alignment = { vertical: 'middle', horizontal: 'center', wrapText : true}
-                                    sheet.getCell('K' + countChild4).value = element.issue_goals
+                                    sheet.getCell('N' + countChild4).value = element.issue_goals
                                     // sheet.getCell('K' + countChild4).alignment = { vertical: 'middle', horizontal: 'center', wrapText : true}
-                                    sheet.getCell('L' + countChild4).value = element.title_goals
+                                    sheet.getCell('O' + countChild4).value = element.title_goals
                                     // sheet.getCell('L' + countChild4).alignment = { vertical: 'middle', horizontal: 'center', wrapText : true}
+                                    sheet.getCell('P' + countChild4).value = element.indikator.map(ind => ind.indikator).join("\n")
                                     if(element.children.length > 0)
                                     {   countChild5 = countChild4
                                         element.children.forEach(element => {
-                                            sheet.getCell('M' + countChild5).value = element.kodefikasi
+                                            sheet.getCell('Q' + countChild5).value = element.kodefikasi
                                             // sheet.getCell('M' + countChild5).alignment = { vertical: 'middle', horizontal: 'center', wrapText : true}
-                                            sheet.getCell('N' + countChild5).value = element.issue_goals
+                                            sheet.getCell('R' + countChild5).value = element.issue_goals
                                             // sheet.getCell('N' + countChild5).alignment = { vertical: 'middle', horizontal: 'center', wrapText : true}
-                                            sheet.getCell('O' + countChild5).value = element.title_goals
+                                            sheet.getCell('S' + countChild5).value = element.title_goals
                                             // sheet.getCell('O' + countChild5).alignment = { vertical: 'middle', horizontal: 'center', wrapText : true}
+                                            sheet.getCell('T' + countChild5).value = element.indikator.map(ind => ind.indikator).join("\n")
                                             if(element.children.length > 0)
                                             {
                                                 

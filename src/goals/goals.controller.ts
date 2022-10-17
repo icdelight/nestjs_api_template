@@ -129,4 +129,14 @@ export class GoalsController {
         // return result;
         res.download(result as string)
     }
+
+    @HttpCode(HttpStatus.OK)
+    @Header('Content-Type', 'text/csv')
+    @Get('downloadCsvGoal/:parent_family')
+    async downloadCsvGoal(@GetUser() user: tbl_users,  @Param('parent_family', ParseIntPipe) parent_family: number, @Res() res: Response) {
+    // downloadExcelGoal(@GetUser() user: tbl_users,  @Param('parent_family', ParseIntPipe) parent_family: number) {
+
+        let result =  await this.goalService.downloadCsvGoal(user,parent_family);
+        res.download(result as string)
+    }
 }
