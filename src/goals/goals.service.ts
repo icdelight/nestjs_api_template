@@ -987,18 +987,23 @@ export class GoalsService {
             { header: 'Kode', key: 'id_goals', width: 20, style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}} },
             { header: 'Isu Strategis', key: 'title_goals', width: 32 , style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}}},
             { header: 'Final Outcome', key: 'desc_goals', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
+            { header: 'Indikator Strategis', key: 'indikator', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
             { header: 'Kode2', key: 'id_goals', width: 20, style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}} },
             { header: 'CFS', key: 'title_goals', width: 32 , style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}}},
             { header: 'KONDISI YANG DIBUTUHKAN', key: 'desc_goals', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
+            { header: 'Indikator CSF', key: 'indikator', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
             { header: 'Kode3', key: 'id_goals', width: 20, style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}} },
             { header: 'Menentukan Kondisi Antara', key: 'title_goals', width: 32 , style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}}},
             { header: 'Flaging Program', key: 'desc_goals', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
+            { header: 'Indikator Program', key: 'indikator', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
             { header: 'Kode4', key: 'id_goals', width: 20, style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}} },
             { header: 'MENENTUKAN KONDISI OPERASIONAL', key: 'title_goals', width: 32 , style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}}},
             { header: 'Flaging Kegiatan', key: 'desc_goals', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
+            { header: 'Indikator Kegiatan', key: 'indikator', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
             { header: 'Kode5', key: 'id_goals', width: 20, style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}} },
             { header: 'MENENTUKAN KONDISI OPERASIONAL (Sub-Keg)', key: 'title_goals', width: 32 , style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}}},
             { header: 'Flaging Sub-Keg', key: 'desc_goals', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
+            { header: 'Indikator Sub-Keg', key: 'indikator', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
         ];
         this.buildSheet(sheet, converTed)
         this.styleSheet(sheet)
