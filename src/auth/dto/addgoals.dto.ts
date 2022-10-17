@@ -11,7 +11,7 @@ export class AddGoalsDto {
     title_goals: string;
 
     @IsString()
-    @IsNotEmpty({message : "$property kosong."})
+    // @IsNotEmpty({message : "$property kosong."})
     desc_goals: string;
 
     @IsString()

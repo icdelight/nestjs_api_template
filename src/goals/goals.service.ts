@@ -614,7 +614,7 @@ export class GoalsService {
             throw new ForbiddenException('You dont have privileges.');
         }
         var finalData = null;
-        console.log(dto);
+        // console.log(dto);
         try {
             const addGoal = await this.goalRepo.createGoal(
                 {
