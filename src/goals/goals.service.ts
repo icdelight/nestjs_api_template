@@ -1047,7 +1047,7 @@ export class GoalsService {
             { header: 'Final Outcome', key: 'desc_goals', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
             { header: 'Indikator Strategis', key: 'indikator', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
             { header: 'Kode2', key: 'id_goals', width: 20, style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}} },
-            { header: 'CFS', key: 'title_goals', width: 32 , style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}}},
+            { header: 'CSF', key: 'title_goals', width: 32 , style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}}},
             { header: 'KONDISI YANG DIBUTUHKAN', key: 'desc_goals', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
             { header: 'Indikator CSF', key: 'indikator', width: 32 , style : { alignment : { vertical: 'justify', horizontal: 'left', wrapText : true}}},
             { header: 'Kode3', key: 'id_goals', width: 20, style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}} },
