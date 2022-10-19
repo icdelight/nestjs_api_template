@@ -16,6 +16,11 @@ export declare class GoalsController {
         message: string;
         data: any;
     }>;
+    initialGoalsAdmin(user: tbl_users): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     childGoals(user: tbl_users, parent_goals: number): Promise<{
         statusCode: number;
         message: string;
@@ -55,10 +60,26 @@ export declare class GoalsController {
         message: string;
         data: any;
     }>;
+    treeGoalsAdmin(user: tbl_users, dto: any): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     searchGoal(user: tbl_users, dto: any): Promise<{
         statusCode: number;
         message: string;
         data: any;
     }>;
+    getStats(user: tbl_users): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
+    getModGoals(user: tbl_users): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     downloadExcelGoal(user: tbl_users, parent_family: number, res: Response): Promise<void>;
+    downloadCsvGoal(user: tbl_users, parent_family: number, res: Response): Promise<void>;
 }

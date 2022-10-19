@@ -158,7 +158,7 @@ let AreaServices = class AreaServices {
         }
         try {
             if (user.role == "2") {
-                topArea = await this.prisma.$queryRaw `SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_area = ${user.id_area} AND a.id_parent_area != '' order by a.id_area asc, a.id_parent_area asc limit ${offset},${limit};`;
+                topArea = await this.prisma.$queryRaw `SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area WHERE a.id_area = ${user.id_area} AND a.id_sub_area != ${user.id_area} AND a.id_parent_area != '' order by a.id_area asc, a.id_parent_area asc limit ${offset},${limit};`;
             }
             else {
                 topArea = await this.prisma.$queryRaw `SELECT a.*,b.desc_sub_area as desc_parent_area FROM mst_area a LEFT JOIN mst_area b ON a.id_parent_area = b.id_sub_area order by a.id_area asc, a.id_parent_area asc limit ${offset},${limit};`;

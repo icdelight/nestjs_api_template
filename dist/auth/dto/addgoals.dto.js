@@ -26,7 +26,6 @@ __decorate([
 ], AddGoalsDto.prototype, "title_goals", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)({ message: "$property kosong." }),
     __metadata("design:type", String)
 ], AddGoalsDto.prototype, "desc_goals", void 0);
 __decorate([

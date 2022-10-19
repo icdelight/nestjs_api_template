@@ -381,9 +381,6 @@ let GoalsService = class GoalsService {
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
-        if (user.role != "1" && user.role != "2") {
-            throw new common_1.ForbiddenException('You dont have privileges.');
-        }
         let allGoal = {};
         let allGoalClust = {};
         let topGoal = null;
@@ -391,8 +388,8 @@ let GoalsService = class GoalsService {
         let resTree = [];
         let idxClust = [];
         try {
-            clustGoal = await this.prisma.$queryRaw `SELECT *,'1' as clustered FROM goals WHERE id_cluster = ${dto.id_cluster} AND parent_family = ${dto.parent_family} ORDER BY parent_goals asc;`;
-            topGoal = await this.prisma.$queryRaw `SELECT *,'1' as clustered FROM goals ORDER BY parent_goals asc;`;
+            clustGoal = await this.prisma.$queryRaw `SELECT *,'1' as clustered FROM goals WHERE id_cluster = ${dto.id_cluster} AND parent_family = ${dto.parent_family} AND status_goals = 1 ORDER BY parent_goals asc;`;
+            topGoal = await this.prisma.$queryRaw `SELECT *,'1' as clustered FROM goals WHERE parent_family = ${dto.parent_family} AND status_goals = 1 ORDER BY parent_goals asc;`;
             let parent_id = 0;
             if (topGoal && topGoal.length > 0) {
                 topGoal.forEach(element => {
@@ -416,7 +413,7 @@ let GoalsService = class GoalsService {
                 });
                 let newObj = allGoalClust;
                 for (let obj in allGoalClust) {
-                    recurseCluster(newObj, allGoal, obj, idxClust);
+                    newObj = recurseCluster(newObj, allGoal, obj, idxClust);
                 }
                 let obj = [];
                 parent_id = 0;
@@ -523,11 +520,13 @@ let GoalsService = class GoalsService {
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
-        if (user.role != "1") {
+        if (user.role != "1" && user.role != "2") {
+            throw new common_1.ForbiddenException('You dont have privileges.');
+        }
+        if (user.role == "2" && (user.id_area != dto.id_area)) {
             throw new common_1.ForbiddenException('You dont have privileges.');
         }
         var finalData = null;
-        console.log(dto);
         try {
             const addGoal = await this.goalRepo.createGoal({
                 issue_goals: dto.issue_goals,
@@ -590,12 +589,37 @@ let GoalsService = class GoalsService {
     async editgoal(user, dto) {
         let statusCode = 999;
         let message = "Something went wrong.";
-        if (user.role != "1") {
+        if (user.role != "1" && user.role != "2") {
+            throw new common_1.ForbiddenException('You dont have privileges.');
+        }
+        if (user.role == "2" && (user.id_area != dto.id_area)) {
             throw new common_1.ForbiddenException('You dont have privileges.');
         }
         let editGoal = null;
         try {
-            editGoal = await this.goalRepo.updateGoals(dto.id_goals, dto);
+            if (isNaN(dto.id_cluster)) {
+                editGoal = await this.prisma.$queryRaw `UPDATE goals SET id_cluster=${dto.id_cluster} WHERE id_goals=${dto.id_goals}`;
+                editGoal = await this.prisma.tbl_goals.updateMany({
+                    data: {
+                        title_goals: dto.title_goals,
+                        desc_goals: dto.desc_goals,
+                        pic_goals: dto.pic_goals,
+                        start_date: dto.start_date,
+                        due_date: dto.due_date,
+                        status_goals: dto.status_goals,
+                        type_goals: dto.type_goals,
+                        indikator: dto.indikator,
+                        id_area: dto.id_area,
+                        issue_goals: dto.issue_goals,
+                    },
+                    where: {
+                        id_goals: dto.id_goals,
+                    }
+                });
+            }
+            else {
+                editGoal = await this.goalRepo.updateGoals(dto.id_goals, dto);
+            }
             if (editGoal) {
                 statusCode = 200;
                 message = "Success Edit Goals.";
@@ -606,6 +630,7 @@ let GoalsService = class GoalsService {
             }
         }
         catch (error) {
+            console.log(error);
             message = this.config.get('APP_DEBUG') == "true" ? error.message : message;
             throw new common_1.NotImplementedException(message);
         }
@@ -615,12 +640,22 @@ let GoalsService = class GoalsService {
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
-        if (user.role != "1") {
+        if (user.role != "1" && user.role != "2") {
             throw new common_1.ForbiddenException('You dont have privileges.');
         }
         let editGoal = null;
         const newMap = JSON.parse(dto.NewMap);
         try {
+            let p = 0;
+            for (const queryKey of Object.keys(newMap)) {
+                const obj = newMap[queryKey];
+                if (obj.parent_goals == '0') {
+                    p++;
+                }
+            }
+            if (p > 1) {
+                throw new common_1.BadRequestException('Parent node is cannot more than one');
+            }
             for (const queryKey of Object.keys(newMap)) {
                 const obj = newMap[queryKey];
                 editGoal = await this.prisma.$queryRaw `update goals set parent_goals = ${obj.parent_goals}, pic_goals = ${obj.pic_goals} where id_goals = ${obj.id_goals};`;
@@ -670,11 +705,50 @@ let GoalsService = class GoalsService {
         return response(statusCode, message, delGoal);
     }
     async initialGoals(user) {
-        const tbl_goals = await this.prisma.tbl_goals.findMany({
-            where: {
-                parent_goals: 0
-            }
-        });
+        let tbl_goals = null;
+        if (user.id_area == null || user.id_area == undefined) {
+            throw new common_1.NotAcceptableException("Mohon menghubungi admin untuk config user anda.");
+        }
+        if (user.role == '1') {
+            tbl_goals = await this.prisma.tbl_goals.findMany({
+                where: {
+                    parent_goals: 0,
+                    status_goals: 1,
+                }
+            });
+        }
+        else {
+            tbl_goals = await this.prisma.tbl_goals.findMany({
+                where: {
+                    parent_goals: 0,
+                    status_goals: 1,
+                    id_area: user.id_area,
+                }
+            });
+        }
+        if (!tbl_goals || tbl_goals.length <= 0) {
+            throw new common_1.NotFoundException("Data Tidak ditemukan");
+        }
+        let finalResult = convertToGoalsArray(tbl_goals);
+        return response(200, "Berhasil ambil data", finalResult.filter((el) => { return el != null; }));
+    }
+    async initialGoalsAdmin(user) {
+        let tbl_goals = null;
+        if (user.role == '1') {
+            tbl_goals = await this.prisma.tbl_goals.findMany({
+                where: {
+                    parent_goals: 0,
+                }
+            });
+        }
+        else {
+            tbl_goals = await this.prisma.tbl_goals.findMany({
+                where: {
+                    parent_goals: 0,
+                    id_area: user.id_area,
+                }
+            });
+        }
         if (!tbl_goals || tbl_goals.length <= 0) {
             throw new common_1.NotFoundException("Data Tidak ditemukan");
         }
@@ -715,6 +789,33 @@ let GoalsService = class GoalsService {
         return tbl_goals;
     }
     async treeGoal(user, parent_family, id_goals) {
+        const getGoal = await this.goalRepo.getGoals({ where: { id_goals: id_goals }, include: { tbl_cluster: { select: { nama_cluster: true } } } });
+        let parent_goal = convertToGoalsArray(getGoal);
+        const param = {
+            where: {
+                parent_family: parent_family,
+                status_goals: 1,
+            },
+            orderBy: {
+                parent_goals: 'asc'
+            },
+            include: {
+                tbl_cluster: {
+                    select: {
+                        nama_cluster: true
+                    }
+                }
+            }
+        };
+        const tbl_goals = await this.goalRepo.getGoals(param);
+        if (!tbl_goals || tbl_goals.length <= 0) {
+            throw new common_1.NotFoundException("Data Tidak ditemukan");
+        }
+        let final = recurseBuildTree(tbl_goals, id_goals);
+        parent_goal[id_goals]['children'] = final;
+        return response(200, "Berhasil ambil data", parent_goal.filter((el) => { return el != null; }));
+    }
+    async treeGoalAdmin(user, parent_family, id_goals) {
         const getGoal = await this.goalRepo.getGoals({ where: { id_goals: id_goals }, include: { tbl_cluster: { select: { nama_cluster: true } } } });
         let parent_goal = convertToGoalsArray(getGoal);
         const param = {
@@ -782,18 +883,23 @@ let GoalsService = class GoalsService {
             { header: 'Kode', key: 'id_goals', width: 20, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
             { header: 'Isu Strategis', key: 'title_goals', width: 32, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
             { header: 'Final Outcome', key: 'desc_goals', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Indikator Strategis', key: 'indikator', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
             { header: 'Kode2', key: 'id_goals', width: 20, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
             { header: 'CFS', key: 'title_goals', width: 32, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
             { header: 'KONDISI YANG DIBUTUHKAN', key: 'desc_goals', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Indikator CSF', key: 'indikator', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
             { header: 'Kode3', key: 'id_goals', width: 20, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
             { header: 'Menentukan Kondisi Antara', key: 'title_goals', width: 32, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
             { header: 'Flaging Program', key: 'desc_goals', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Indikator Program', key: 'indikator', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
             { header: 'Kode4', key: 'id_goals', width: 20, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
             { header: 'MENENTUKAN KONDISI OPERASIONAL', key: 'title_goals', width: 32, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
             { header: 'Flaging Kegiatan', key: 'desc_goals', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Indikator Kegiatan', key: 'indikator', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
             { header: 'Kode5', key: 'id_goals', width: 20, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
             { header: 'MENENTUKAN KONDISI OPERASIONAL (Sub-Keg)', key: 'title_goals', width: 32, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
             { header: 'Flaging Sub-Keg', key: 'desc_goals', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Indikator Sub-Keg', key: 'indikator', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
         ];
         this.buildSheet(sheet, converTed);
         this.styleSheet(sheet);
@@ -810,6 +916,59 @@ let GoalsService = class GoalsService {
         });
         return File;
     }
+    async downloadCsvGoal(user, parent_family) {
+        if (parent_family == null || parent_family == undefined) {
+            throw new common_1.BadRequestException("Parameter download tidak valid.");
+        }
+        var filter = {
+            where: {}
+        };
+        if (parent_family != 0)
+            filter.where.parent_family = parent_family;
+        const data = await this.goalRepo.getGoals(filter);
+        if (!data)
+            throw new common_1.NotFoundException("Tidak ditemukan data");
+        const converTed = recurseBuildTree(data, "0").filter((val) => { return val != null; });
+        let rows = [];
+        let book = new exceljs_1.Workbook();
+        let sheet = book.addWorksheet('Goals');
+        sheet.columns = [
+            { header: 'Kode', key: 'id_goals', width: 20, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'Isu Strategis', key: 'title_goals', width: 32, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'Final Outcome', key: 'desc_goals', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Indikator Strategis', key: 'indikator', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Kode2', key: 'id_goals', width: 20, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'CSF', key: 'title_goals', width: 32, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'KONDISI YANG DIBUTUHKAN', key: 'desc_goals', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Indikator CSF', key: 'indikator', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Kode3', key: 'id_goals', width: 20, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'Menentukan Kondisi Antara', key: 'title_goals', width: 32, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'Flaging Program', key: 'desc_goals', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Indikator Program', key: 'indikator', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Kode4', key: 'id_goals', width: 20, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'MENENTUKAN KONDISI OPERASIONAL', key: 'title_goals', width: 32, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'Flaging Kegiatan', key: 'desc_goals', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Indikator Kegiatan', key: 'indikator', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Kode5', key: 'id_goals', width: 20, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'MENENTUKAN KONDISI OPERASIONAL (Sub-Keg)', key: 'title_goals', width: 32, style: { alignment: { vertical: 'middle', horizontal: 'center', wrapText: true } } },
+            { header: 'Flaging Sub-Keg', key: 'desc_goals', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+            { header: 'Indikator Sub-Keg', key: 'indikator', width: 32, style: { alignment: { vertical: 'justify', horizontal: 'left', wrapText: true } } },
+        ];
+        this.buildSheet(sheet, converTed);
+        this.styleSheet(sheet);
+        let File = await new Promise((resolve, reject) => {
+            tmp.file({ discardDescriptor: true, prefix: 'GoalSheet ', postfix: '.csv', mode: parseInt('0600', 8) }, async (err, file) => {
+                if (err)
+                    throw new common_1.BadRequestException(err);
+                book.csv.writeFile(file).then(_ => {
+                    resolve(file);
+                }).catch(err => {
+                    throw new common_1.BadRequestException(err);
+                });
+            });
+        });
+        return File;
+    }
     buildSheet(sheet, converTed) {
         let countChild2 = 2;
         let countChild3 = 0;
@@ -817,35 +976,42 @@ let GoalsService = class GoalsService {
         let countChild5 = 0;
         let lastCountChild = null;
         let row = [];
+        let ind = "";
         converTed.forEach((element, index) => {
             row[1] = element.kodefikasi;
             row[2] = element.issue_goals;
             row[3] = element.title_goals;
+            ind = element.indikator.map(ind => ind.indikator).join("\n");
+            row[4] = ind;
             sheet.addRow(row);
             countChild2 = sheet.rowCount;
             if (element.children.length > 0) {
                 element.children.forEach(element => {
-                    sheet.getCell('D' + countChild2).value = element.kodefikasi;
-                    sheet.getCell('E' + countChild2).value = element.issue_goals;
-                    sheet.getCell('F' + countChild2).value = element.title_goals;
+                    sheet.getCell('E' + countChild2).value = element.kodefikasi;
+                    sheet.getCell('F' + countChild2).value = element.issue_goals;
+                    sheet.getCell('G' + countChild2).value = element.title_goals;
+                    sheet.getCell('H' + countChild2).value = element.indikator.map(ind => ind.indikator).join("\n");
                     if (element.children.length > 0) {
                         countChild3 = countChild2;
                         element.children.forEach(element => {
-                            sheet.getCell('G' + countChild3).value = element.kodefikasi;
-                            sheet.getCell('H' + countChild3).value = element.issue_goals;
-                            sheet.getCell('I' + countChild3).value = element.title_goals;
+                            sheet.getCell('I' + countChild3).value = element.kodefikasi;
+                            sheet.getCell('J' + countChild3).value = element.issue_goals;
+                            sheet.getCell('K' + countChild3).value = element.title_goals;
+                            sheet.getCell('L' + countChild3).value = element.indikator.map(ind => ind.indikator).join("\n");
                             if (element.children.length > 0) {
                                 countChild4 = countChild3;
                                 element.children.forEach(element => {
-                                    sheet.getCell('J' + countChild4).value = element.kodefikasi;
-                                    sheet.getCell('K' + countChild4).value = element.issue_goals;
-                                    sheet.getCell('L' + countChild4).value = element.title_goals;
+                                    sheet.getCell('M' + countChild4).value = element.kodefikasi;
+                                    sheet.getCell('N' + countChild4).value = element.issue_goals;
+                                    sheet.getCell('O' + countChild4).value = element.title_goals;
+                                    sheet.getCell('P' + countChild4).value = element.indikator.map(ind => ind.indikator).join("\n");
                                     if (element.children.length > 0) {
                                         countChild5 = countChild4;
                                         element.children.forEach(element => {
-                                            sheet.getCell('M' + countChild5).value = element.kodefikasi;
-                                            sheet.getCell('N' + countChild5).value = element.issue_goals;
-                                            sheet.getCell('O' + countChild5).value = element.title_goals;
+                                            sheet.getCell('Q' + countChild5).value = element.kodefikasi;
+                                            sheet.getCell('R' + countChild5).value = element.issue_goals;
+                                            sheet.getCell('S' + countChild5).value = element.title_goals;
+                                            sheet.getCell('T' + countChild5).value = element.indikator.map(ind => ind.indikator).join("\n");
                                             if (element.children.length > 0) {
                                             }
                                             countChild5++;
@@ -893,6 +1059,88 @@ let GoalsService = class GoalsService {
                 right: { style: 'thin', color: { argb: 'FFFFFF' } },
             };
         });
+    }
+    async getStats(user) {
+        let statusCode = 999;
+        let message = "Something went wrong.";
+        let data = null;
+        let Goals = null;
+        let resData = {};
+        try {
+            if (user.role == "1") {
+                Goals = await this.prisma.$queryRaw `SELECT id_goals,parent_goals,parent_family,id_cluster,indikator FROM goals ORDER BY parent_family,parent_goals;`;
+            }
+            else {
+                Goals = await this.prisma.$queryRaw `SELECT id_goals,parent_goals,parent_family,id_cluster,indikator FROM goals WHERE id_area = ${user.id_area} ORDER BY parent_family,parent_goals;`;
+            }
+            let parent = 0;
+            let child = 0;
+            let clust = 0;
+            let ind = 0;
+            if (Goals && Goals.length > 0) {
+                Goals.forEach(element => {
+                    if (element !== null) {
+                        if (element.parent_goals == 0) {
+                            parent++;
+                        }
+                        else {
+                            child++;
+                        }
+                        if (element.id_cluster != null) {
+                            clust++;
+                        }
+                        if (element.indikator.length > 2) {
+                            ind++;
+                        }
+                    }
+                });
+                statusCode = 200;
+                message = "Success Inquiry Stats.";
+                resData = {
+                    goals: parent,
+                    sub_goals: child,
+                    cluster_goals: clust,
+                    indikator_goals: ind,
+                };
+            }
+        }
+        catch (error) {
+            console.log(error);
+            throw new common_1.InternalServerErrorException(error);
+        }
+        return response(statusCode, message, resData);
+    }
+    async getLastModifiedGoals(user) {
+        let statusCode = 999;
+        let message = "Something went wrong.";
+        let data = null;
+        let Goals = null;
+        let resData = {};
+        const perPage = 5;
+        let offset = 0;
+        let limit = offset + perPage;
+        try {
+            if (user.role == "1") {
+                Goals = await this.prisma.$queryRaw `SELECT id_goals,title_goals,desc_goals,pic_goals,parent_goals,parent_family,id_cluster,indikator,last_modified_date FROM goals ORDER BY last_modified_date desc limit ${offset},${limit};`;
+            }
+            else {
+                Goals = await this.prisma.$queryRaw `SELECT id_goals,title_goals,desc_goals,pic_goals,parent_goals,parent_family,id_cluster,indikator,last_modified_date FROM goals WHERE id_area = ${user.id_area} ORDER BY last_modified_date desc limit ${offset},${limit};`;
+            }
+            if (Goals && Goals.length > 0) {
+                statusCode = 200;
+                message = "Success Inquiry Last Goals.";
+                resData = Goals;
+            }
+            else {
+                statusCode = 0;
+                message = "Failled Inquiry Last Goals.";
+            }
+        }
+        catch (error) {
+            console.log(error);
+            throw new common_1.InternalServerErrorException(error);
+        }
+        return response(statusCode, message, resData);
     }
 };
 GoalsService = __decorate([

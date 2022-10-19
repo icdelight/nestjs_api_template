@@ -25,12 +25,6 @@ let ClusterServices = class ClusterServices {
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
-        if (user.role != "1" && user.role != "2") {
-            throw new common_1.ForbiddenException('You dont have privileges.');
-        }
-        if (user.role != '1') {
-            throw new common_1.ForbiddenException('You dont have privileges.');
-        }
         let topCluster = [];
         try {
             console.log(user.role);
@@ -101,11 +95,8 @@ let ClusterServices = class ClusterServices {
         let statusCode = 999;
         let message = "Something went wrong.";
         let data = null;
-        if (user.role != "1" && user.role != "2") {
-            throw new common_1.ForbiddenException('You dont have privileges.');
-        }
         let where = "";
-        if (user.role == "2") {
+        if (user.role != "1") {
             where = `WHERE a.id_area = ${user.id_area} `;
         }
         let topCluster = [];
@@ -121,7 +112,7 @@ let ClusterServices = class ClusterServices {
             limit = offset + perPage;
         }
         try {
-            if (user.role == "2") {
+            if (user.role != "1") {
                 if (dto.search != undefined && dto.search != '') {
                     topCluster = await this.prisma.$queryRaw `SELECT a.*,b.desc_area as desc_area FROM cluster a LEFT JOIN mst_area b ON a.id_area = b.id_sub_area WHERE a.id_area = ${user.id_area} AND (a.nama_cluster like ${filter} OR b.desc_area like ${filter}) order by a.id_area asc limit ${offset},${limit};`;
                 }

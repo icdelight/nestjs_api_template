@@ -29,6 +29,9 @@ let GoalsController = class GoalsController {
     initialGoals(user) {
         return this.goalService.initialGoals(user);
     }
+    initialGoalsAdmin(user) {
+        return this.goalService.initialGoalsAdmin(user);
+    }
     childGoals(user, parent_goals) {
         return this.goalService.childGoals(user, parent_goals);
     }
@@ -61,11 +64,30 @@ let GoalsController = class GoalsController {
         var id_goals = parseInt(dto.id_goals);
         return this.goalService.treeGoal(user, parent_family, id_goals);
     }
+    treeGoalsAdmin(user, dto) {
+        if (dto.parent_family == undefined || dto.parent_family == null)
+            throw new common_1.BadRequestException("Parent Family belum didefinisikan");
+        if (dto.id_goals == undefined || dto.id_goals == null)
+            throw new common_1.BadRequestException("ID Goals belum didefinisikan");
+        var parent_family = parseInt(dto.parent_family);
+        var id_goals = parseInt(dto.id_goals);
+        return this.goalService.treeGoalAdmin(user, parent_family, id_goals);
+    }
     searchGoal(user, dto) {
         return this.goalService.searchGoal(user, dto);
     }
+    getStats(user) {
+        return this.goalService.getStats(user);
+    }
+    getModGoals(user) {
+        return this.goalService.getLastModifiedGoals(user);
+    }
     async downloadExcelGoal(user, parent_family, res) {
         let result = await this.goalService.downloadExcelGoal(user, parent_family);
+        res.download(result);
+    }
+    async downloadCsvGoal(user, parent_family, res) {
+        let result = await this.goalService.downloadCsvGoal(user, parent_family);
         res.download(result);
     }
 };
@@ -85,6 +107,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], GoalsController.prototype, "initialGoals", null);
+__decorate([
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Get)('initialgoalsadmin'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], GoalsController.prototype, "initialGoalsAdmin", null);
 __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, common_1.Post)('childgoals'),
@@ -157,6 +187,15 @@ __decorate([
 ], GoalsController.prototype, "treeGoals", null);
 __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Post)('treegoalsadmin'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], GoalsController.prototype, "treeGoalsAdmin", null);
+__decorate([
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, common_1.Post)('searchgoals'),
     __param(0, (0, decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
@@ -164,6 +203,22 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], GoalsController.prototype, "searchGoal", null);
+__decorate([
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Get)('getstats'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], GoalsController.prototype, "getStats", null);
+__decorate([
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Get)('getlastmodifgoals'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], GoalsController.prototype, "getModGoals", null);
 __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, common_1.Header)('Content-Type', 'text/xlsx'),
@@ -175,6 +230,17 @@ __decorate([
     __metadata("design:paramtypes", [Object, Number, Object]),
     __metadata("design:returntype", Promise)
 ], GoalsController.prototype, "downloadExcelGoal", null);
+__decorate([
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Header)('Content-Type', 'text/csv'),
+    (0, common_1.Get)('downloadCsvGoal/:parent_family'),
+    __param(0, (0, decorator_1.GetUser)()),
+    __param(1, (0, common_1.Param)('parent_family', common_1.ParseIntPipe)),
+    __param(2, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Number, Object]),
+    __metadata("design:returntype", Promise)
+], GoalsController.prototype, "downloadCsvGoal", null);
 GoalsController = __decorate([
     (0, common_1.UseGuards)(guard_1.JwtGuard),
     (0, common_1.Controller)('goals'),

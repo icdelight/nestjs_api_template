@@ -36,7 +36,7 @@ let AuthServices = class AuthServices {
                 data: {
                     name: dto.user,
                     pass: hash,
-                    role: dto.role,
+                    role: '4',
                     flag_active: true,
                     firstName: dto.firstname,
                 },

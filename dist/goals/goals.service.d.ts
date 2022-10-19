@@ -64,6 +64,11 @@ export declare class GoalsService {
         message: string;
         data: any;
     }>;
+    initialGoalsAdmin(user: tbl_users): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     childGoals(user: tbl_users, parent_goals: any): Promise<{
         statusCode: number;
         message: string;
@@ -75,12 +80,28 @@ export declare class GoalsService {
         message: string;
         data: any;
     }>;
+    treeGoalAdmin(user: tbl_users, parent_family: any, id_goals: any): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
     searchGoal(user: tbl_users, dto: any): Promise<{
         statusCode: number;
         message: string;
         data: any;
     }>;
     downloadExcelGoal(user: tbl_users, parent_family: Number): Promise<unknown>;
+    downloadCsvGoal(user: tbl_users, parent_family: Number): Promise<unknown>;
     private buildSheet;
     private styleSheet;
+    getStats(user: tbl_users): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
+    getLastModifiedGoals(user: tbl_users): Promise<{
+        statusCode: number;
+        message: string;
+        data: any;
+    }>;
 }
