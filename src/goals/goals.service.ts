@@ -1040,7 +1040,7 @@ export class GoalsService {
         let rows = []
         let book =  new Workbook();
         let sheet = book.addWorksheet('Goals');
-        
+         
         sheet.columns = [
             { header: 'Kode', key: 'id_goals', width: 20, style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}} },
             { header: 'Isu Strategis', key: 'title_goals', width: 32 , style : { alignment : { vertical: 'middle', horizontal: 'center', wrapText : true}}},
