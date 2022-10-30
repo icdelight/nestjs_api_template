@@ -8,6 +8,6 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
   }));
-  await app.listen(7070);
+  await app.listen(7070,'185.210.144.32');
 }
 bootstrap();
